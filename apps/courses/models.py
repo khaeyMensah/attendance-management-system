@@ -10,3 +10,15 @@ class Course(models.Model):
     
     def __str__(self):
         return f"{self.code} - {self.title}"
+
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'student'}, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('student', 'course')
+        
+    def __str__(self):
+        return f"{self.student} - {self.course}"

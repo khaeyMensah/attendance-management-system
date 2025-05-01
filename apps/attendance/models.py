@@ -17,18 +17,6 @@ class Session(models.Model):
     def __str__(self):
         return f"{self.course.code} @ {self.start_time.strftime('%H:%M')}"
     
-class Enrollment(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'student'}, related_name='enrollments')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
-    enrolled_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        unique_together = ('student', 'course')
-        
-    def __str__(self):
-        return f"{self.student} - {self.course}"
-    
-    
 class AttendanceRecord(models.Model):
     STATUS_CHOICES = (
         ('present', 'Present'),
