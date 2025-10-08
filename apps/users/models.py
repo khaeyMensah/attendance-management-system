@@ -30,14 +30,8 @@ class User(AbstractUser):
     
     
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-    
-    # Student-specific fields
     student_id = models.CharField(max_length=10, unique=True, null=True, blank=True, help_text="Student's unique index number")
-    
-    # Lecturer-specific fields
     staff_id = models.CharField(max_length=20, unique=True, null=True, blank=True, help_text="Lecturer's staff identification number") 
-    
-    # Common fields
     email = models.EmailField(max_length=50, unique=True, help_text="User's email address")
     full_name = models.CharField(max_length=50, help_text="User's full name")
     
@@ -52,3 +46,4 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.full_name} ({self.role})"
+    
