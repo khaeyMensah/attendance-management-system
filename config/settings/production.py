@@ -18,3 +18,4 @@ else:
 # # Static files storage settings
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+

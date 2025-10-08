@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_browser_reload.middleware.BrowserReloadMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -127,6 +128,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 #     BASE_DIR / 'static',
 # ]
 
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# STATIC_URL = '/static/'
 # STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
