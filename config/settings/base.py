@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config, Csv
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -27,8 +28,8 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
-
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=['http://127.0.0.1'], cast=Csv())
+ 
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv(), default=['http://localhost', 'http://127.0.0.1'])
 
 # Application definition
@@ -140,3 +141,6 @@ AUTH_USER_MODEL = 'users.User'
 TAILWIND_APP_NAME = 'theme'
 
 NPM_BIN_PATH = "D:/Program Files/nodejs/npm.cmd"
+
+# print("DEBUG:", DEBUG)
+# print("ALLOWED_HOSTS:", ALLOWED_HOSTS)

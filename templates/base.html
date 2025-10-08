@@ -9,15 +9,88 @@
     {% load static %} <link rel="stylesheet" href="{% static "css/base.css" %}">
     {% tailwind_css %}
   </head>
-  <body class="bg-khaey font-serif leading-normal tracking-normal">
+
+  <body
+    class="flex flex-col bg-gray-600 min-h-screen overflow-hidden font-serif leading-normal tracking-normal"
+  >
     {% block body %}
-    <div class="container mx-auto">
-      <section class="flex items-center justify-center h-screen">
-        <h1 class="text-5xl bg-blue-400">Django + Tailwind = ❤️</h1>
-      </section>
+    <header class="px-5 flex justify-between h-15 bg-gray-600" id="header">
+      <nav class="block">
+        <div class="hamburger-menu bg-amber-500 w-5 h-5 flex flex-col justify-between p-1">
+          <div class="h-1 bg-white rounded"></div>
+          <div class="h-1 bg-white rounded"></div>
+          <div class="h-1 bg-white rounded"></div>
+        </div>
+        <a class="flex items-center bg-gray-600 hover:drop-shadow-sm rounded-lg" href="#">
+          <span class="logo flex justify-center items-center bg-gray-400 h-10 w-10 rounded-full">@</span>
+          <span class="app-name text-lg ml-3 font-semibold hover:bg-gray-600 py-4 rounded-r-lg">Attendance Manager</span>
+        </a>
+      </nav>
+      <form class="flex items-center hover:drop-shadow-sm" role="search">
+        <input
+          type="text"
+          class="bg-white rounded-l-lg h-8 px-5 z-1"
+          placeholder="Search"
+          aria-label="Search"
+        />
+        <button type="submit" class="bg-black h-8 w-8 rounded-r-lg text-white" aria-label="Search">
+          <span>$</span>
+        </button>
+      </form>
+      <div class="other-nav-items flex justify-center space-x-10 items-center">
+        <p class="bg-gray-300 flex w-8 h-8 rounded-full items-center justify-center">
+          #
+        </p>
+      </div>
+    </header>
+
+    <div class="flex flex-grow">
+      <aside class="w-[20%] px-2" id="side-bar">
+        <div
+          class="nav-container h-full hover:drop-shadow-gray-900 bg-gray-600 hover:drop-shadow-sm rounded-tr-xl"
+        >
+          <a
+            class="nav-items flex items-center hover:bg-gray-700 p-3 rounded-tr-xl w-[99%]"
+            href="#"
+          >
+            <p
+              class="icon flex justify-center items-center bg-gray-400 h-8 w-8 mr-2 rounded-full"
+            >
+              #
+            </p>
+            <p class="link">Dashboard</p>
+          </a>
+
+          <a
+            class="nav-items flex items-center hover:bg-gray-700 p-3 rounded-tr-xl w-[99%]"
+            href="#"
+          >
+            <p
+              class="icon flex justify-center items-center bg-gray-400 h-8 w-8 mr-2 rounded-full"
+            >
+              #
+            </p>
+            <p class="link">Dashboard</p>
+          </a>
+        </div>
+      </aside>
+      <div
+        class="flex flex-col flex-grow mr-2 drop-shadow-sm drop-shadow-gray-900"
+        id="main-content"
+      >
+        <section class="flex flex-grow justify-center rounded-t-3xl bg-white">
+          {% block content %}
+          <section class="flex items-center justify-center">
+            <h1 class="text-5xl bg-blue-400">Django + Tailwind = ❤️</h1>
+          </section>
+          {% endblock content %}
+        </section>
+        <footer class="bg-gray-100 text-white h-15" id="footer"></footer>
+      </div>
     </div>
-    {% block content %}{% endblock content %} {% endblock body %}
+    {% endblock body %}
   </body>
+
   <script>
     {% block script %}{% endblock script %}
   </script>
