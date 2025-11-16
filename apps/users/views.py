@@ -4,7 +4,9 @@ from apps.users.forms import LoginForm, RegisterForm
 
 # Create your views here.
 def home(request):
-    return render(request, 'users/dashboard.html')
+    # return render(request, 'users/dashboard.html')
+    return render(request, 'base.html')
+    # return render(request, 'authentication/password_change_form.html')
 
 
 def login_view(request):

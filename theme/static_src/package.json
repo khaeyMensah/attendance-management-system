@@ -7,7 +7,9 @@
     "build": "npm run build:clean && npm run build:tailwind",
     "build:clean": "rimraf ../static/css/dist",
     "build:tailwind": "cross-env NODE_ENV=production postcss ./src/styles.css -o ../static/css/dist/styles.css --minify",
-    "dev": "cross-env NODE_ENV=development postcss ./src/styles.css -o ../static/css/dist/styles.css --watch"
+    "tailwind:watch": "cross-env NODE_ENV=development postcss ./src/styles.css -o ../static/css/dist/styles.css --watch",
+    "watch": "cross-env NODE_ENV=development postcss ./src/styles.css -o ../static/css/dist/styles.css --watch",
+    "dev": "concurrently \"npm run tailwind:watch\" \"cd ../../ && python manage.py runserver\""
   },
   "keywords": [],
   "author": "",

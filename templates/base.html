@@ -15,12 +15,12 @@
   >
     {% block body %}
     <header class="px-5 flex justify-between h-15 bg-gray-600" id="header">
-      <nav class="block">
-        <div class="hamburger-menu bg-amber-500 w-5 h-5 flex flex-col justify-between p-1">
+      <nav class="flex">
+        {% comment %} <div class="hamburger-menu bg-amber-500 w-5 h-5 flex flex-col justify-between p-1">
           <div class="h-1 bg-white rounded"></div>
           <div class="h-1 bg-white rounded"></div>
           <div class="h-1 bg-white rounded"></div>
-        </div>
+        </div> {% endcomment %}
         <a class="flex items-center bg-gray-600 hover:drop-shadow-sm rounded-lg" href="#">
           <span class="logo flex justify-center items-center bg-gray-400 h-10 w-10 rounded-full">@</span>
           <span class="app-name text-lg ml-3 font-semibold hover:bg-gray-600 py-4 rounded-r-lg">Attendance Manager</span>
@@ -81,7 +81,7 @@
         <section class="flex flex-grow justify-center rounded-t-3xl bg-white">
           {% block content %}
           <section class="flex items-center justify-center">
-            <h1 class="text-5xl bg-blue-400">Django + Tailwind = ❤️</h1>
+            <h1 class="text-5xl bg-khaey">Attendance Management Loading...</h1>
           </section>
           {% endblock content %}
         </section>

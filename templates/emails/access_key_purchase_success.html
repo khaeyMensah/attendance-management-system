@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Access Key Purchase Successful</title>
+</head>
+<body>
+    <p>Dear {{ user.get_full_name }},</p>
+    <p>Thank you for your purchase. Your access key has been successfully generated.</p>
+    <p><strong>Access Key:</strong> {{ access_key.key }}</p>
+    <p><strong>School:</strong> {{ school.name }}</p>
+    <p><strong>Price:</strong> {{ access_key.price }}</p>
+    <p><strong>Expiry Date:</strong> {{ access_key.expiry_date }}</p>
+    <p>If you have any questions, please contact our support team.</p>
+    <p>Best regards,</p>
+    <p>The Micro Focus Team</p>
+</body>
+</html>

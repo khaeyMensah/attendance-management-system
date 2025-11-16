@@ -1,0 +1,36 @@
+{% extends "base.html" %} 
+{% load static %} 
+{% include 'messages.html' %} 
+{% block stylesheet %}
+  <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
+{% endblock %} {% block body %}
+
+<main
+  class="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4"
+>
+  <!-- Authentication Logo and Title -->
+  <div class="text-center mb-6">
+    <h4 class="text-2xl font-bold text-gray-800 mb-2">
+      <a href="{% url 'home' %}" class="hover:text-blue-600 transition"
+        >Access Key Manager</a
+      >
+    </h4>
+    <div class="flex justify-center">
+      <img
+        src="{% static 'img/akm-logo.png' %}"
+        alt="AKM logo"
+        class="w-20 h-20 object-contain"
+      />
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="w-full max-w-2xl">
+    {% block content %}
+    
+    {% endblock %}
+  </div>
+  
+</main>
+
+{% endblock %}
