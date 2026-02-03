@@ -2,96 +2,164 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{% block title %} Django Tailwind {% endblock title %}</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    {% load static %} <link rel="stylesheet" href="{% static "css/base.css" %}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{% block title %}AttendX — QR Attendance{% endblock title %}</title>
+
+    {% comment %} Tailwind compiled CSS (from django-tailwind) {% endcomment %}
     {% tailwind_css %}
+
+    {% comment %} Minimal custom overrides after Tailwind so they take precedence when needed {% endcomment %}
+    <link rel="stylesheet" href=" static 'css/base.css' ">
   </head>
 
-  <body
-    class="flex flex-col bg-gray-600 min-h-screen overflow-hidden font-serif leading-normal tracking-normal"
-  >
+  <body class="min-h-screen font-sans bg-gradient-to-b from-white via-slate-50 to-slate-100 text-slate-800">
     {% block body %}
-    <header class="px-5 flex justify-between h-15 bg-gray-600" id="header">
-      <nav class="flex">
-        {% comment %} <div class="hamburger-menu bg-amber-500 w-5 h-5 flex flex-col justify-between p-1">
-          <div class="h-1 bg-white rounded"></div>
-          <div class="h-1 bg-white rounded"></div>
-          <div class="h-1 bg-white rounded"></div>
-        </div> {% endcomment %}
-        <a class="flex items-center bg-gray-600 hover:drop-shadow-sm rounded-lg" href="#">
-          <span class="logo flex justify-center items-center bg-gray-400 h-10 w-10 rounded-full">@</span>
-          <span class="app-name text-lg ml-3 font-semibold hover:bg-gray-600 py-4 rounded-r-lg">Attendance Manager</span>
-        </a>
-      </nav>
-      <form class="flex items-center hover:drop-shadow-sm" role="search">
-        <input
-          type="text"
-          class="bg-white rounded-l-lg h-8 px-5 z-1"
-          placeholder="Search"
-          aria-label="Search"
-        />
-        <button type="submit" class="bg-black h-8 w-8 rounded-r-lg text-white" aria-label="Search">
-          <span>$</span>
-        </button>
-      </form>
-      <div class="other-nav-items flex justify-center space-x-10 items-center">
-        <p class="bg-gray-300 flex w-8 h-8 rounded-full items-center justify-center">
-          #
-        </p>
+    <!-- Top navigation -->
+    <header class="sticky top-0 z-40 border-b bg-white/75 backdrop-blur">
+      <div class="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-3" aria-label="AttendX home">
+              <span class="inline-flex items-center justify-center w-10 h-10 font-semibold text-white bg-indigo-600 rounded-lg">AX</span>
+              <span class="text-lg font-semibold">AttendX</span>
+            </a>
+
+            <nav class="hidden gap-3 text-sm md:flex" aria-label="Primary">
+              <a href="/" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
+              <a href="/about" class="px-3 py-2 rounded hover:bg-slate-100">About</a>
+            </nav>
+          </div>
+
+          <div class="flex items-center gap-3">
+            {% if user.is_authenticated %}
+              <a href=" url 'users:logout' " class="items-center hidden px-4 py-2 text-sm bg-white border rounded-md sm:inline-flex text-slate-700 hover:bg-slate-50">Logout</a>
+            {% else %}
+              <a href=" url 'users:login' " class="items-center hidden px-4 py-2 text-sm text-white bg-indigo-600 rounded-md sm:inline-flex hover:bg-indigo-700">Login</a>
+            {% endif %}
+
+            <button id="mobile-menu-button" class="p-2 rounded md:hidden hover:bg-slate-100" aria-label="Toggle menu">
+              <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
+
+      <!-- Mobile nav -->
+      <nav id="mobile-menu" class="hidden border-t md:hidden" aria-label="Mobile">
+        <div class="px-4 py-3 space-y-1">
+          <a href="/" class="block px-3 py-2 rounded hover:bg-slate-100">Home</a>
+          <a href="/about" class="block px-3 py-2 rounded hover:bg-slate-100">About</a>
+          {% if user.is_authenticated %}
+            <a href=" url 'users:logout' " class="block px-3 py-2 rounded hover:bg-slate-100">Logout</a>
+          {% else %}
+            <a href=" url 'users:login' " class="block px-3 py-2 rounded hover:bg-slate-100">Login</a>
+          {% endif %}
+        </div>
+      </nav>
     </header>
 
-    <div class="flex flex-grow">
-      <aside class="w-[20%] px-2" id="side-bar">
-        <div
-          class="nav-container h-full hover:drop-shadow-gray-900 bg-gray-600 hover:drop-shadow-sm rounded-tr-xl"
-        >
-          <a
-            class="nav-items flex items-center hover:bg-gray-700 p-3 rounded-tr-xl w-[99%]"
-            href="#"
-          >
-            <p
-              class="icon flex justify-center items-center bg-gray-400 h-8 w-8 mr-2 rounded-full"
-            >
-              #
-            </p>
-            <p class="link">Dashboard</p>
-          </a>
+    <!-- Page content -->
+    <main class="max-w-6xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
+      {% block hero %}
+      <!-- Default homepage hero; override in other templates if needed -->
+      <section class="grid items-center gap-8 md:grid-cols-2">
+        <div>
+          <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl text-slate-900">
+            Fast, Secure QR Code Attendance for Universities
+          </h1>
+          <p class="max-w-xl mt-4 text-slate-600">
+            Eliminate proxy attendance and save lecture time with real-time QR check-ins. Simple for students, powerful for lecturers.
+          </p>
 
-          <a
-            class="nav-items flex items-center hover:bg-gray-700 p-3 rounded-tr-xl w-[99%]"
-            href="#"
-          >
-            <p
-              class="icon flex justify-center items-center bg-gray-400 h-8 w-8 mr-2 rounded-full"
-            >
-              #
-            </p>
-            <p class="link">Dashboard</p>
-          </a>
+          <div class="flex flex-wrap gap-3 mt-6">
+            <a href=" url 'users:login' " class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Login to Continue</a>
+            <a href="/about" class="inline-flex items-center px-4 py-3 bg-white border rounded-md text-slate-700 hover:bg-slate-50">Learn More</a>
+          </div>
+
+          <!-- How it works -->
+          <div class="grid gap-4 mt-10 sm:grid-cols-3" aria-label="How it works">
+            <div class="p-4 bg-white rounded-lg shadow-sm">
+              <div class="flex items-start gap-3">
+                <span class="inline-flex items-center justify-center w-10 h-10 font-medium text-indigo-600 rounded-full bg-indigo-50">1</span>
+                <div>
+                  <h4 class="font-medium">Lecturer creates session</h4>
+                  <p class="text-sm text-slate-500">Define time, course and session details.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white rounded-lg shadow-sm">
+              <div class="flex items-start gap-3">
+                <span class="inline-flex items-center justify-center w-10 h-10 font-medium text-indigo-600 rounded-full bg-indigo-50">2</span>
+                <div>
+                  <h4 class="font-medium">QR code is generated</h4>
+                  <p class="text-sm text-slate-500">Unique, time-limited QR shown on the lecture screen.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white rounded-lg shadow-sm">
+              <div class="flex items-start gap-3">
+                <span class="inline-flex items-center justify-center w-10 h-10 font-medium text-indigo-600 rounded-full bg-indigo-50">3</span>
+                <div>
+                  <h4 class="font-medium">Students scan & record</h4>
+                  <p class="text-sm text-slate-500">Instant and secure attendance captured.</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </aside>
-      <div
-        class="flex flex-col flex-grow mr-2 drop-shadow-sm drop-shadow-gray-900"
-        id="main-content"
-      >
-        <section class="flex flex-grow justify-center rounded-t-3xl bg-white">
-          {% block content %}
-          <section class="flex items-center justify-center">
-            <h1 class="text-5xl bg-khaey">Attendance Management Loading...</h1>
-          </section>
-          {% endblock content %}
-        </section>
-        <footer class="bg-gray-100 text-white h-15" id="footer"></footer>
-      </div>
-    </div>
-    {% endblock body %}
-  </body>
 
-  <script>
-    {% block script %}{% endblock script %}
-  </script>
+        <!-- Right column: role cards -->
+        <aside class="space-y-4">
+          <div class="p-6 bg-white shadow-md rounded-2xl">
+            <h3 class="text-lg font-semibold">Student</h3>
+            <p class="mt-2 text-sm text-slate-600">Scan QR code, mark attendance, and view your records.</p>
+            <div class="mt-4">
+              <a href=" url 'users:login' " class="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700">Scan Now</a>
+            </div>
+          </div>
+
+          <div class="p-6 bg-white shadow-md rounded-2xl">
+            <h3 class="text-lg font-semibold">Lecturer</h3>
+            <p class="mt-2 text-sm text-slate-600">Create sessions, generate QR codes and view reports.</p>
+            <div class="mt-4">
+              <a href=" url 'users:login' " class="inline-flex items-center px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Create Session</a>
+            </div>
+          </div>
+
+          <div class="p-4 text-sm shadow-sm bg-gradient-to-r from-indigo-50 to-emerald-50 rounded-2xl text-slate-700">
+            <strong class="block">Why AttendX?</strong>
+            <ul class="mt-2 space-y-1">
+              <li class="flex items-start gap-2"><span class="text-green-600">•</span> Prevents proxy attendance</li>
+              <li class="flex items-start gap-2"><span class="text-indigo-600">•</span> Saves lecture time</li>
+              <li class="flex items-start gap-2"><span class="text-sky-600">•</span> Accurate, real-time records</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+      {% endblock hero %}
+
+      {% block content %}{% endblock content %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t">
+      <div class="flex flex-col items-center justify-between max-w-6xl gap-4 px-4 py-6 mx-auto sm:px-6 lg:px-8 sm:flex-row">
+        <p class="text-sm text-slate-600">Loading — AttendX</p>
+        <p class="text-sm text-slate-500">© {% now "Y" %} ...Khaey</p>
+      </div>
+    </footer>
+
+    {% endblock body %}
+
+    <!-- Tiny JS: mobile nav toggle -->
+    <script>
+      document.getElementById('mobile-menu-button')?.addEventListener('click', function () {
+        const m = document.getElementById('mobile-menu');
+        if (m) m.classList.toggle('hidden');
+      });
+    </script>
+  </body>
 </html>
