@@ -4,16 +4,14 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 
 class LoginForm(AuthenticationForm):
-    
-    class Meta:
-        model = User
-        # fields = ("email", "password",)
-    
+    pass
+
 
 class RegisterForm(UserCreationForm):
-    forms.EmailField(max_length=254, required=True, widget=forms.EmailInput())
-    
+    email = forms.EmailField(max_length=254, required=True, widget=forms.EmailInput())
+    full_name = forms.CharField(max_length=50, required=True)
+    role = forms.ChoiceField(choices=User.ROLE_CHOICES, required=True)
+
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
-    
+        fields = ("username", "full_name", "email", "role", "password1", "password2")

@@ -4,8 +4,11 @@ from apps.users import views
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
+# Add this line to register the namespace used in templates
+app_name = 'users'
+
 urlpatterns = [
-    path('', views.home, name='home'),
+    # path('', include(('apps.users.urls', 'users'), namespace='users')),
     path('student-dashboard/', views.student_dashboard_view, name='student_dashboard'),
     path('lecturer-dashboard/', views.lecturer_dashboard_view, name='lecturer_dashboard'),
     

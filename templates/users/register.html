@@ -1,0 +1,30 @@
+{% extends "base_accounts.html" %}
+{% load static widget_tweaks %}
+{% block title %}Register — ClassMark{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-white shadow-md rounded-xl">
+  <h2 class="mb-4 text-2xl font-semibold text-slate-900">Create an account</h2>
+  <p class="mb-6 text-sm text-slate-600">Register as a student or lecturer to start using QR attendance.</p>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div>
+        <label class="block mb-1 text-sm font-medium text-slate-700" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field.errors }}
+        {{ field|add_class:"w-full px-3 py-2 border rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-300" }}
+        {% if field.help_text %}
+          <p class="mt-1 text-xs text-slate-400">{{ field.help_text }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <div class="flex items-center justify-between">
+      <button type="submit" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Register</button>
+      <a href="{% url 'users:login' %}" class="text-sm text-indigo-600 hover:underline">Already have an account?</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

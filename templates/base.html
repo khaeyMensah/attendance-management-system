@@ -4,13 +4,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{% block title %}AttendX — QR Attendance{% endblock title %}</title>
+    <title>{% block title %}ClassMark — QR Attendance{% endblock title %}</title>
 
     {% comment %} Tailwind compiled CSS (from django-tailwind) {% endcomment %}
     {% tailwind_css %}
 
+    {% comment %} Allow pages to inject extra stylesheets (e.g. accounts) {% endcomment %}
+    {% block stylesheet %}{% endblock stylesheet %}
+
     {% comment %} Minimal custom overrides after Tailwind so they take precedence when needed {% endcomment %}
-    <link rel="stylesheet" href=" static 'css/base.css' ">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
   </head>
 
   <body class="min-h-screen font-sans bg-gradient-to-b from-white via-slate-50 to-slate-100 text-slate-800">
@@ -20,9 +23,9 @@
       <div class="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-4">
-            <a href="/" class="flex items-center gap-3" aria-label="AttendX home">
-              <span class="inline-flex items-center justify-center w-10 h-10 font-semibold text-white bg-indigo-600 rounded-lg">AX</span>
-              <span class="text-lg font-semibold">AttendX</span>
+            <a href="/" class="flex items-center gap-3" aria-label="ClassMark home">
+              <span class="inline-flex items-center justify-center w-10 h-10 font-semibold text-white bg-indigo-600 rounded-lg">CM</span>
+              <span class="text-lg font-semibold">ClassMark</span>
             </a>
 
             <nav class="hidden gap-3 text-sm md:flex" aria-label="Primary">
@@ -33,9 +36,9 @@
 
           <div class="flex items-center gap-3">
             {% if user.is_authenticated %}
-              <a href=" url 'users:logout' " class="items-center hidden px-4 py-2 text-sm bg-white border rounded-md sm:inline-flex text-slate-700 hover:bg-slate-50">Logout</a>
+              <a href="{% url 'users:logout' %}" class="items-center hidden px-4 py-2 text-sm bg-white border rounded-md sm:inline-flex text-slate-700 hover:bg-slate-50">Logout</a>
             {% else %}
-              <a href=" url 'users:login' " class="items-center hidden px-4 py-2 text-sm text-white bg-indigo-600 rounded-md sm:inline-flex hover:bg-indigo-700">Login</a>
+              <a href="{% url 'users:login' %}" class="items-center hidden px-4 py-2 text-sm text-white bg-indigo-600 rounded-md sm:inline-flex hover:bg-indigo-700">Login</a>
             {% endif %}
 
             <button id="mobile-menu-button" class="p-2 rounded md:hidden hover:bg-slate-100" aria-label="Toggle menu">
@@ -51,9 +54,9 @@
           <a href="/" class="block px-3 py-2 rounded hover:bg-slate-100">Home</a>
           <a href="/about" class="block px-3 py-2 rounded hover:bg-slate-100">About</a>
           {% if user.is_authenticated %}
-            <a href=" url 'users:logout' " class="block px-3 py-2 rounded hover:bg-slate-100">Logout</a>
+            <a href="{% url 'users:logout' %}" class="block px-3 py-2 rounded hover:bg-slate-100">Logout</a>
           {% else %}
-            <a href=" url 'users:login' " class="block px-3 py-2 rounded hover:bg-slate-100">Login</a>
+            <a href="{% url 'users:login' %}" class="block px-3 py-2 rounded hover:bg-slate-100">Login</a>
           {% endif %}
         </div>
       </nav>
@@ -73,7 +76,7 @@
           </p>
 
           <div class="flex flex-wrap gap-3 mt-6">
-            <a href=" url 'users:login' " class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Login to Continue</a>
+            <a href=" {% url 'users:login' %} " class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Login to Continue</a>
             <a href="/about" class="inline-flex items-center px-4 py-3 bg-white border rounded-md text-slate-700 hover:bg-slate-50">Learn More</a>
           </div>
 
@@ -130,7 +133,7 @@
           </div>
 
           <div class="p-4 text-sm shadow-sm bg-gradient-to-r from-indigo-50 to-emerald-50 rounded-2xl text-slate-700">
-            <strong class="block">Why AttendX?</strong>
+            <strong class="block">Why ClassMark?</strong>
             <ul class="mt-2 space-y-1">
               <li class="flex items-start gap-2"><span class="text-green-600">•</span> Prevents proxy attendance</li>
               <li class="flex items-start gap-2"><span class="text-indigo-600">•</span> Saves lecture time</li>
@@ -147,7 +150,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t">
       <div class="flex flex-col items-center justify-between max-w-6xl gap-4 px-4 py-6 mx-auto sm:px-6 lg:px-8 sm:flex-row">
-        <p class="text-sm text-slate-600">Loading — AttendX</p>
+        <p class="text-sm text-slate-600">Loading — ClassMark</p>
         <p class="text-sm text-slate-500">© {% now "Y" %} ...Khaey</p>
       </div>
     </footer>
