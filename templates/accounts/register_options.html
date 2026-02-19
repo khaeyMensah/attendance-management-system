@@ -1,0 +1,36 @@
+{% extends "base_accounts.html" %}
+{% load static %}
+{% block title %}Register — Choose Role{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-white shadow-md rounded-xl text-center">
+  <h2 class="text-2xl font-semibold mb-4">Create an account</h2>
+  <p class="text-sm text-slate-600 mb-6">Select your role to continue with registration.</p>
+
+  <div class="grid gap-4 sm:grid-cols-3">
+    <a href="{% url 'users:register' %}?role=student" class="block px-4 py-6 bg-white rounded-lg shadow hover:shadow-md">
+      <h3 class="font-semibold">Student</h3>
+      <p class="text-sm text-slate-500 mt-2">Scan QR code, mark attendance, view records.</p>
+    </a>
+
+    <a href="{% url 'users:register' %}?role=lecturer" class="block px-4 py-6 bg-white rounded-lg shadow hover:shadow-md">
+      <h3 class="font-semibold">Lecturer</h3>
+      <p class="text-sm text-slate-500 mt-2">Create sessions, generate QR codes, view reports.</p>
+    </a>
+
+    <a href="{% url 'users:register' %}?role=admin" class="block px-4 py-6 bg-white rounded-lg shadow hover:shadow-md">
+      <h3 class="font-semibold">Admin</h3>
+      <p class="text-sm text-slate-500 mt-2">Manage system settings and users.</p>
+    </a>
+  </div>
+
+  <div class="mt-6">
+    <a href="{% url 'users:login' %}" class="text-sm text-indigo-600 hover:underline">Already have an account? Login</a>
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+
