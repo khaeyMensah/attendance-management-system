@@ -22,6 +22,15 @@ class RegisterForm(UserCreationForm):
         if role in ('student', 'lecturer') and not identification:
             raise forms.ValidationError('An ID is required for the selected role.')
 
+        # Ensure identification is unique for the appropriate model field
+        if identification:
+            if role == 'student':
+                if User.objects.filter(student_id=identification).exists():
+                    raise forms.ValidationError('This student ID is already registered.')
+            if role == 'lecturer':
+                if User.objects.filter(staff_id=identification).exists():
+                    raise forms.ValidationError('This staff ID is already registered.')
+
         return cleaned
 
     def save(self, commit=True):
