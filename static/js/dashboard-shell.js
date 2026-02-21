@@ -4,8 +4,45 @@
 
   const profileToggle = document.getElementById("profile-toggle");
   const profileMenu = document.getElementById("profile-menu");
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const sidebarPanel = document.getElementById("dashboard-sidebar-panel");
   const searchForm = document.getElementById("dashboard-search-form");
   const searchInput = document.getElementById("dashboard-search");
+  const mobileQuery = window.matchMedia("(max-width: 767px)");
+
+  const isMobileViewport = function () {
+    return mobileQuery.matches;
+  };
+
+  const setMobileSidebarState = function (open) {
+    document.body.classList.toggle("mobile-sidebar-open", open);
+    if (sidebarToggle) {
+      sidebarToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+  };
+
+  const closeMobileSidebar = function () {
+    setMobileSidebarState(false);
+  };
+
+  const handleViewportMode = function () {
+    if (isMobileViewport()) {
+      closeMobileSidebar();
+    } else {
+      closeMobileSidebar();
+    }
+  };
+
+  handleViewportMode();
+  mobileQuery.addEventListener("change", handleViewportMode);
+
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener("click", function () {
+      if (!isMobileViewport()) return;
+      const isOpen = document.body.classList.contains("mobile-sidebar-open");
+      setMobileSidebarState(!isOpen);
+    });
+  }
 
   if (profileToggle && profileMenu) {
     const closeMenu = function () {
@@ -27,6 +64,34 @@
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") closeMenu();
+    });
+  }
+
+  document.addEventListener("click", function (event) {
+    if (!isMobileViewport()) return;
+    if (!document.body.classList.contains("mobile-sidebar-open")) return;
+    if (!sidebarPanel || !sidebarToggle) return;
+
+    const clickedInsideSidebar = sidebarPanel.contains(event.target);
+    const clickedToggle = sidebarToggle.contains(event.target);
+    if (!clickedInsideSidebar && !clickedToggle) {
+      closeMobileSidebar();
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      closeMobileSidebar();
+    }
+  });
+
+  if (sidebarPanel) {
+    sidebarPanel.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        if (isMobileViewport()) {
+          closeMobileSidebar();
+        }
+      });
     });
   }
 
