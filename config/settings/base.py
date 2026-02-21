@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=['http://127.0.0.1'], cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'], cast=Csv())
  
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv(), default=['http://localhost', 'http://127.0.0.1'])
 
@@ -123,15 +123,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# STATICFILES_DIRS = [
-#     BASE_DIR / 'static',
-# ]
-
-# STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
@@ -147,37 +138,6 @@ TAILWIND_APP_NAME = 'theme'
 
 NPM_BIN_PATH = "D:/Program Files/nodejs/npm.cmd"
 
-# # URL to redirect to after login
-# LOGIN_REDIRECT_URL = 'home'
-
-# # URL to redirect to after logout
-# LOGOUT_REDIRECT_URL = 'home'
-
-# # Site ID for Django's sites framework
-# SITE_ID = 1
-
-# # Authentication backends
-# AUTHENTICATION_BACKENDS = (
-#     'django.contrib.auth.backends.ModelBackend',
-# )
-
-# # Authentication method: username and email
-# ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-
-# # Require email for account creation
-# ACCOUNT_EMAIL_REQUIRED = True
-
-# # Email verification is mandatory
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
-# # Rate limits for account activities
-# ACCOUNT_RATE_LIMITS = {
-#     'login_failed': '5/300s',    # 5 failed login attempts per 5 minutes
-#     'signup': '20/h',            # 20 signups per hour
-#     'password_reset': '5/60m',   # 5 password resets per hour
-# }
-
-    
 # Email settings
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST')

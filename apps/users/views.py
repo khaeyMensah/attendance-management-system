@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from apps.users.decorators import role_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -8,6 +9,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
 
 from apps.users.forms import LoginForm, RegisterForm
 from apps.users.tokens import account_activation_token
@@ -42,22 +44,30 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            # mark inactive until email verification
-            user.is_active = False
-            user.save()
-            # send verification email
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your ClassMark account.'
-            message = render_to_string('authentication/acc_active_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
-            send_mail(mail_subject, message, from_email, [user.email], fail_silently=False)
-            return redirect('users:registration_pending')
+            try:
+                with transaction.atomic():
+                    user = form.save(commit=False)
+                    # mark inactive until email verification
+                    user.is_active = False
+                    user.save()
+                    # send verification email
+                    current_site = get_current_site(request)
+                    mail_subject = 'Activate your ClassMark account.'
+                    message = render_to_string('authentication/acc_active_email.html', {
+                        'user': user,
+                        'domain': current_site.domain,
+                        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                        'token': account_activation_token.make_token(user),
+                    })
+                    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
+                    send_mail(mail_subject, message, from_email, [user.email], fail_silently=False)
+            except Exception:
+                messages.error(
+                    request,
+                    'We could not send your verification email right now. Please try registering again in a moment.',
+                )
+            else:
+                return redirect('users:registration_pending')
     else:
         # if role provided, initialize the form with that role
         if role:
@@ -77,13 +87,8 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
-        # Log the user in after activation and redirect to role dashboard
-        login(request, user)
-        if user.role == 'student':
-            return redirect('users:student_dashboard')
-        if user.role == 'lecturer':
-            return redirect('users:lecturer_dashboard')
-        return redirect('home')
+        messages.success(request, 'Your email has been verified. Please log in to continue.')
+        return redirect('users:login')
     else:
         return render(request, 'authentication/activation_invalid.html')
 
