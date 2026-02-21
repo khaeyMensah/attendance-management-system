@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% block dashboard_title %}Dashboard - ClassMark{% endblock dashboard_title %}{% endblock title %}
+
+{% block stylesheet %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/dashboard-shell.css' %}">
+
+{% endblock stylesheet %}
+
+{% block body %}
+<div
+  id="dashboard-shell"
+  class="min-h-screen bg-slate-100 text-slate-900 flex flex-col"
+  data-role="{{ request.user.role|default:'' }}"
+  data-student-dashboard-url="{% url 'users:student_dashboard' %}"
+  data-lecturer-dashboard-url="{% url 'users:lecturer_dashboard' %}"
+  data-admin-dashboard-url="{% url 'users:admin_dashboard' %}"
+  data-password-change-url="{% url 'users:password_change' %}"
+  data-logout-url="{% url 'users:logout' %}"
+>
+  <header class="bg-slate-800 text-white border-b border-slate-700">
+    <div class="mx-auto max-w-full px-4 sm:px-6 lg:px-5 h-16 flex items-center justify-between gap-5">
+      <div class="inline-flex items-center gap-2">
+        <button
+          id="sidebar-toggle"
+          aria-pressed="false"
+          class="inline-flex items-center justify-center w-10 h-10 p-0 text-slate-100 border-slate-600 rounded-full hover:bg-slate-700"
+          title="Collapse sidebar"
+          aria-label="Collapse sidebar"
+          type="button"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path class="burger-line line-1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16"/>
+            <path class="burger-line line-2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16"/>
+            <path class="burger-line line-3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 17h16"/>
+          </svg>
+        </button>
+        {% if request.user.role == 'student' %}
+        <a href="{% url 'users:student_dashboard' %}" class="inline-flex items-center gap-1">
+        {% elif request.user.role == 'lecturer' %}
+        <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center gap-1">
+        {% elif request.user.role == 'admin' %}
+        <a href="{% url 'users:admin_dashboard' %}" class="inline-flex items-center gap-1">
+        {% else %}
+        <a href="{% url 'home' %}" class="inline-flex items-center gap-1">
+        {% endif %}
+          <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-semibold text-white bg-indigo-600 rounded-xl">CM</span>
+          <span class="text-lg font-semibold">ClassMark</span>
+        </a>
+      </div>
+
+      <form id="dashboard-search-form" class="flex items-center w-full max-w-md" role="search" autocomplete="off">
+        <input
+          id="dashboard-search"
+          type="search"
+          name="q"
+          class="w-full rounded-l-full border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Search"
+          aria-label="Search pages"
+          list="dashboard-pages"
+        />
+        <datalist id="dashboard-pages">
+          <option value="Dashboard"></option>
+          <option value="Scan QR Code"></option>
+          <option value="My Attendance"></option>
+          <option value="Courses"></option>
+          <option value="Sessions"></option>
+          <option value="Reports"></option>
+          <option value="Profile"></option>
+          <option value="Settings"></option>
+          <option value="Logout"></option>
+        </datalist>
+        <button type="submit" class="inline-flex items-center justify-center h-[42px] w-12 rounded-r-full bg-indigo-600 hover:bg-indigo-700" aria-label="Search">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/>
+          </svg>
+        </button>
+      </form>
+
+      <div class="relative">
+        <button
+          id="profile-toggle"
+          class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-slate-600 hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          title="{{ request.user.full_name|default:request.user.username }}"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-label="Open profile menu"
+          type="button"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.12 17.8A10.94 10.94 0 0 1 12 15c2.21 0 4.27.66 5.88 1.8M15 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+          </svg>
+        </button>
+        <div id="profile-menu" class="profile-menu hidden absolute right-0 mt-2 w-56 rounded-lg bg-white text-slate-800 border border-slate-200 shadow-lg z-30">
+          <div class="px-4 py-3 border-b border-slate-100">
+            <p class="text-sm font-medium">{{ request.user.full_name|default:request.user.username }}</p>
+            <p class="text-xs text-slate-500">{{ request.user.email }}</p>
+          </div>
+
+          {% if request.user.role == 'student' %}
+          <a href="{% url 'users:student_dashboard' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50">
+          {% elif request.user.role == 'lecturer' %}
+          <a href="{% url 'users:lecturer_dashboard' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50">
+          {% elif request.user.role == 'admin' %}
+          <a href="{% url 'users:admin_dashboard' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50">
+          {% else %}
+          <a href="{% url 'home' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50">
+          {% endif %}
+            <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.12 17.8A10.94 10.94 0 0 1 12 15c2.21 0 4.27.66 5.88 1.8M15 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+            </svg>
+            <span>Profile</span>
+          </a>
+          <a href="{% url 'users:password_change' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50">
+            <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V9a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm3-10V9a3 3 0 0 1 6 0v2H9z"/>
+            </svg>
+            <span>Settings</span>
+          </a>
+          <a href="{% url 'users:logout' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-rose-700 hover:bg-rose-50">
+            <svg class="h-4 w-4 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17l5-5m0 0l-5-5m5 5H9m-4 8h4V4H5"/>
+            </svg>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex-1 mx-auto max-w-full w-full px-4 sm:px-6 lg:px-0 py-0 dashboard-shell">
+    {% include "users/_sidebar.html" %}
+
+    <section class="dashboard-content flex-1 bg-white shadow p-6">
+      {% block dashboard_content %}
+      <h1 class="text-2xl font-semibold">{% block dashboard_heading %}{% endblock dashboard_heading %}</h1>
+      <p class="mt-2 text-slate-600">{% block dashboard_subheading %}{% endblock dashboard_subheading %}</p>
+
+      {% block dashboard_stats %}{% endblock dashboard_stats %}
+      {% block dashboard_actions %}{% endblock dashboard_actions %}
+      {% block dashboard_extra %}{% endblock dashboard_extra %}
+      {% endblock dashboard_content %}
+    </section>
+  </div>
+
+  <footer class="bg-white border-t">
+    <div class="max-w-full px-4 py-6 mx-auto sm:px-6 lg:px-8">
+      <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <p class="text-sm font-medium text-slate-700">ClassMark Dashboard</p>
+          <p class="text-sm text-slate-500">Monitor sessions, attendance records, and account activity.</p>
+        </div>
+        <nav class="flex items-center gap-4 text-sm text-slate-600" aria-label="Dashboard footer">
+          <a href="{% url 'home' %}" class="hover:text-slate-900">Home</a>
+          <a href="/about" class="hover:text-slate-900">About</a>
+          <a href="{% url 'users:password_change' %}" class="hover:text-slate-900">Settings</a>
+          <a href="{% url 'users:logout' %}" class="hover:text-slate-900">Logout</a>
+        </nav>
+      </div>
+      <div class="pt-4 mt-4 text-sm border-t text-slate-500 border-slate-200">
+        &copy; {% now "Y" %} Khaey. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock body %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/dashboard-shell.js' %}"></script>
+{% endblock scripts %}
+

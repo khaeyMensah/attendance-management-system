@@ -6,30 +6,45 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{% block title %}ClassMark — QR Attendance{% endblock title %}</title>
 
-    {% comment %} Tailwind compiled CSS (from django-tailwind) {% endcomment %}
     {% tailwind_css %}
-
-    {% comment %} Allow pages to inject extra stylesheets (e.g. accounts) {% endcomment %}
     {% block stylesheet %}{% endblock stylesheet %}
-
-    {% comment %} Minimal custom overrides after Tailwind so they take precedence when needed {% endcomment %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
   </head>
 
-  <body class="min-h-screen font-sans bg-gradient-to-b from-white via-slate-50 to-slate-100 text-slate-800">
+  <body class="min-h-screen flex flex-col font-sans bg-gradient-to-b from-white via-slate-50 to-slate-100 text-slate-800">
     {% block body %}
     <!-- Top navigation -->
     <header class="sticky top-0 z-40 border-b bg-white/75 backdrop-blur">
-      <div class="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
+      <div class="{% block main_nav %} max-w-6xl px-4 mx-auto sm:px-6 lg:px-8 {% endblock main_nav %}">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-4">
-            <a href="/" class="flex items-center gap-3" aria-label="ClassMark home">
+            {% if user.is_authenticated %}
+              {% if user.role == 'student' %}
+                <a href="{% url 'users:student_dashboard' %}" class="flex items-center gap-3" aria-label="ClassMark home">
+              {% elif user.role == 'lecturer' %}
+                <a href="{% url 'users:lecturer_dashboard' %}" class="flex items-center gap-3" aria-label="ClassMark home">
+              {% else %}
+                <a href="{% url 'home' %}" class="flex items-center gap-3" aria-label="ClassMark home">
+              {% endif %}
+            {% else %}
+              <a href="{% url 'home' %}" class="flex items-center gap-3" aria-label="ClassMark home">
+            {% endif %}
               <span class="inline-flex items-center justify-center w-10 h-10 font-semibold text-white bg-indigo-600 rounded-lg">CM</span>
               <span class="text-lg font-semibold">ClassMark</span>
             </a>
 
             <nav class="hidden gap-3 text-sm md:flex" aria-label="Primary">
-              <a href="/" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
+              {% if user.is_authenticated %}
+                {% if user.role == 'student' %}
+                  <a href="{% url 'users:student_dashboard' %}" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
+                {% elif user.role == 'lecturer' %}
+                  <a href="{% url 'users:lecturer_dashboard' %}" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
+                {% else %}
+                  <a href="{% url 'home' %}" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
+                {% endif %}
+              {% else %}
+                <a href="{% url 'home' %}" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
+              {% endif %}
               <a href="/about" class="px-3 py-2 rounded hover:bg-slate-100">About</a>
             </nav>
           </div>
@@ -63,10 +78,9 @@
     </header>
 
     <!-- Page content -->
-    <main class="max-w-6xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
+    <main class="{% block main_class %}flex-1 w-full max-w-6xl px-4 py-12 mx-auto sm:px-6 lg:px-8 {% endblock main_class %}">
     {% block content %}
       {% block hero %}
-      <!-- Default homepage hero; override in other templates if needed -->
       <section class="grid items-center gap-8 md:grid-cols-2">
         <div>
           <h1 class="text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl text-slate-900">
@@ -77,7 +91,17 @@
           </p>
 
           <div class="flex flex-wrap gap-3 mt-6">
-            <a href=" {% url 'users:login' %} " class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Login to Continue</a>
+            {% if user.is_authenticated %}
+              {% if user.role == 'student' %}
+                <a href="{% url 'users:student_dashboard' %}" class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Go to Dashboard</a>
+              {% elif user.role == 'lecturer' %}
+                <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Go to Dashboard</a>
+              {% else %}
+                <a href="{% url 'home' %}" class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Home</a>
+              {% endif %}
+            {% else %}
+              <a href="{% url 'users:login' %}" class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Login to Continue</a>
+            {% endif %}
             <a href="/about" class="inline-flex items-center px-4 py-3 bg-white border rounded-md text-slate-700 hover:bg-slate-50">Learn More</a>
           </div>
 
@@ -121,7 +145,11 @@
             <h3 class="text-lg font-semibold">Student</h3>
             <p class="mt-2 text-sm text-slate-600">Scan QR code, mark attendance, and view your records.</p>
             <div class="mt-4">
-              <a href=" url 'users:login' " class="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700">Scan Now</a>
+              {% if user.is_authenticated and user.role == 'student' %}
+                <a href="{% url 'users:student_dashboard' %}" class="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700">Scan Now</a>
+              {% else %}
+                <a href="{% url 'users:login' %}" class="inline-flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700">Scan Now</a>
+              {% endif %}
             </div>
           </div>
 
@@ -129,7 +157,11 @@
             <h3 class="text-lg font-semibold">Lecturer</h3>
             <p class="mt-2 text-sm text-slate-600">Create sessions, generate QR codes and view reports.</p>
             <div class="mt-4">
-              <a href=" url 'users:login' " class="inline-flex items-center px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Create Session</a>
+              {% if user.is_authenticated and user.role == 'lecturer' %}
+                <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Create Session</a>
+              {% else %}
+                <a href="{% url 'users:login' %}" class="inline-flex items-center px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Create Session</a>
+              {% endif %}
             </div>
           </div>
 
@@ -150,20 +182,39 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t">
-      <div class="flex flex-col items-center justify-between max-w-6xl gap-4 px-4 py-6 mx-auto sm:px-6 lg:px-8 sm:flex-row">
-        <p class="text-sm text-slate-600">Loading — ClassMark</p>
-        <p class="text-sm text-slate-500">© {% now "Y" %} ...Khaey</p>
+      <div class="max-w-6xl px-4 py-6 mx-auto sm:px-6 lg:px-8">
+        <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p class="text-sm font-medium text-slate-700">ClassMark</p>
+            <p class="text-sm text-slate-500">QR Attendance Management for classrooms and campuses.</p>
+          </div>
+          <nav class="flex items-center gap-4 text-sm text-slate-600" aria-label="Footer">
+            <a href="{% url 'home' %}" class="hover:text-slate-900">Home</a>
+            <a href="/about" class="hover:text-slate-900">About</a>
+            {% if user.is_authenticated %}
+              {% if user.role == 'student' %}
+                <a href="{% url 'users:student_dashboard' %}" class="hover:text-slate-900">Dashboard</a>
+              {% elif user.role == 'lecturer' %}
+                <a href="{% url 'users:lecturer_dashboard' %}" class="hover:text-slate-900">Dashboard</a>
+              {% elif user.role == 'admin' %}
+                <a href="{% url 'users:admin_dashboard' %}" class="hover:text-slate-900">Dashboard</a>
+              {% endif %}
+            {% else %}
+              <a href="{% url 'users:login' %}" class="hover:text-slate-900">Login</a>
+            {% endif %}
+          </nav>
+        </div>
+        <div class="pt-4 mt-4 text-sm border-t text-slate-500 border-slate-200">
+          &copy; {% now "Y" %} Khaey. All rights reserved.
+        </div>
       </div>
     </footer>
 
     {% endblock body %}
-
-    <!-- Tiny JS: mobile nav toggle -->
-    <script>
-      document.getElementById('mobile-menu-button')?.addEventListener('click', function () {
-        const m = document.getElementById('mobile-menu');
-        if (m) m.classList.toggle('hidden');
-      });
-    </script>
   </body>
+
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/base.js' %}"></script>
+    {% block scripts %}{% endblock %}
 </html>

@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from apps.users.decorators import role_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -15,7 +16,17 @@ from apps.users.models import User
 
 # Create your views here.
 def home(request):
-    return render(request, 'users/dashboard.html')
+    # If user is authenticated, redirect them to their role dashboard
+    if request.user.is_authenticated:
+        role = getattr(request.user, 'role', None)
+        if role == 'student':
+            return redirect('users:student_dashboard')
+        if role == 'lecturer':
+            return redirect('users:lecturer_dashboard')
+        if role == 'admin':
+            return redirect('admin:index')
+    # Unauthenticated users see the public landing (base template default hero)
+    return render(request, 'base.html')
     # return render(request, 'base.html')
     # return render(request, 'authentication/registration_pending.html')
 
@@ -83,11 +94,15 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            # redirect to role-specific dashboard
+            if user.role == 'student':
+                return redirect('users:student_dashboard')
+            if user.role == 'lecturer':
+                return redirect('users:lecturer_dashboard')
             return redirect('home')
     else:
         form = LoginForm(request)
     return render(request, 'accounts/login.html', {'form': form})
-
 
 
 def logout_view(request):
@@ -96,10 +111,19 @@ def logout_view(request):
 
 
 @login_required
+@role_required('student')
 def student_dashboard_view(request):
-    return render(request, 'users/dashboard.html')
+    return render(request, 'users/student_dashboard.html')
+    # return render(request, 'users/dashboard.html')
 
 
 @login_required
+@role_required('lecturer')
 def lecturer_dashboard_view(request):
-    return render(request, 'users/dashboard.html')
+    return render(request, 'users/lecturer_dashboard.html')
+
+
+@login_required
+@role_required('admin')
+def admin_dashboard_view(request):
+    return render(request, 'users/admin_dashboard.html')

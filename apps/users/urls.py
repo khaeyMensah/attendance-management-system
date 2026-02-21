@@ -4,13 +4,13 @@ from apps.users import views
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
-# Add this line to register the namespace used in templates
 app_name = 'users'
 
 urlpatterns = [
     # path('', include(('apps.users.urls', 'users'), namespace='users')),
     path('student-dashboard/', views.student_dashboard_view, name='student_dashboard'),
     path('lecturer-dashboard/', views.lecturer_dashboard_view, name='lecturer_dashboard'),
+    path('admin-dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     
     path('register/', views.register_view, name='register'),
     path('register-options/', views.register_options, name='register_options'),
@@ -18,7 +18,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     
     # Account activation urls
-    # path('activate/<uidb64>/<token>/', views.activate, name='activate'),  
     path('registration_pending/', TemplateView.as_view(template_name='authentication/registration_pending.html'), name='registration_pending'),  
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('activation_success/', TemplateView.as_view(template_name='authentication/activation_success.html'), name='activation_success'),  

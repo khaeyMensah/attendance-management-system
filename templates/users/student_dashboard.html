@@ -1,0 +1,29 @@
+{% extends "users/dashboard_shell.html" %}
+{% load static %}
+{% block dashboard_title %}Student Dashboard - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}Student Dashboard{% endblock dashboard_heading %}
+{% block dashboard_subheading %}Welcome, {{ request.user.full_name|default:request.user.username }}. Here's your attendance overview.{% endblock dashboard_subheading %}
+
+{% block dashboard_stats %}
+<div id="attendance" class="mt-6 grid gap-4 sm:grid-cols-3">
+  <div class="p-4 bg-white border rounded-lg">
+    <div class="text-sm text-slate-500">Total Classes</div>
+    <div class="text-2xl font-bold">-</div>
+  </div>
+  <div class="p-4 bg-white border rounded-lg">
+    <div class="text-sm text-slate-500">Present</div>
+    <div class="text-2xl font-bold text-green-600">-</div>
+  </div>
+  <div class="p-4 bg-white border rounded-lg">
+    <div class="text-sm text-slate-500">Absent</div>
+    <div class="text-2xl font-bold text-red-600">-</div>
+  </div>
+</div>
+{% endblock dashboard_stats %}
+
+{% block dashboard_actions %}
+<div id="scan-qr" class="mt-6">
+  <a href="{% url 'users:student_dashboard' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Scan QR Code</a>
+</div>
+{% endblock dashboard_actions %}
+
