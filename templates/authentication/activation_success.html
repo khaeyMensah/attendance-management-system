@@ -1,22 +1,8 @@
-{% extends "base_accounts.html" %} {% block title %}Activation Success 
-{% endblock %} {% block content %}
-<div class="flex justify-center">
-  <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md md:max-w-lg">
-    <h3 class="mb-4 text-2xl font-semibold text-gray-800">
-      Account Activated!
-    </h3>
+{% extends "base_accounts.html" %}
+{% block title %}Activation Success - ClassMark{% endblock %}
 
-    <div
-      class="px-4 py-3 text-green-700 bg-green-100 border border-green-400 rounded"
-    >
-      <p>
-        Your account has been successfully activated.
-        <a href="{% url 'users:login' %}" class="text-blue-600 hover:underline"
-          >Log in</a
-        >
-        to complete your profile.
-      </p>
-    </div>
-  </div>
-</div>
+{% block content %}
+<h2 class="mb-2 text-2xl font-semibold text-slate-900">Account activated</h2>
+<div class="auth-message auth-message-success mb-5">Your account has been activated successfully.</div>
+<a href="{% url 'users:login' %}" class="inline-block w-full px-4 py-2.5 text-center text-white rounded-lg bg-indigo-600 hover:bg-indigo-700">Log in now</a>
 {% endblock %}

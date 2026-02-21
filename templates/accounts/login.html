@@ -1,28 +1,36 @@
 {% extends "base_accounts.html" %}
 {% load static widget_tweaks %}
-{% block title %}Login — ClassMark{% endblock %}
+{% block title %}Login - ClassMark{% endblock %}
 
 {% block content %}
-<div class="p-6 bg-white shadow-md rounded-xl">
-  <h2 class="mb-4 text-2xl font-semibold text-slate-900">Welcome back</h2>
-  <p class="mb-6 text-sm text-slate-600">Sign in to access your attendance dashboard.</p>
+<h2 class="mb-2 text-2xl font-semibold text-slate-900">Welcome back</h2>
+<p class="mb-6 text-sm text-slate-600">Sign in to access your attendance dashboard.</p>
 
-  <form method="post" class="space-y-4">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for field in form %}
-      <div>
-        <label for="{{ field.id_for_label }}" class="block mb-1 text-sm font-medium text-slate-700">{{ field.label }}</label>
-        {{ field.errors }}
-        {{ field|add_class:"w-full px-3 py-2 border rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-300" }}
-        {% if field.help_text %}<p class="mt-1 text-xs text-slate-400">{{ field.help_text }}</p>{% endif %}
-      </div>
-    {% endfor %}
+{% if form.non_field_errors %}
+  <div class="auth-message auth-message-error mb-4">{{ form.non_field_errors }}</div>
+{% endif %}
 
-    <div class="flex items-center justify-between">
-      <button type="submit" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Login</button>
-      <a href="{% url 'users:register_options' %}" class="text-sm text-indigo-600 hover:underline">Create account</a>
+<form method="post" class="space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label for="{{ field.id_for_label }}" class="block mb-1 text-sm font-medium text-slate-700">{{ field.label }}</label>
+      {% if field.errors %}
+        <div class="auth-error-list">{{ field.errors }}</div>
+        {{ field|add_class:"auth-input auth-input-error" }}
+      {% else %}
+        {{ field|add_class:"auth-input" }}
+      {% endif %}
+      {% if field.help_text %}<p class="auth-help">{{ field.help_text }}</p>{% endif %}
     </div>
-  </form>
-</div>
+  {% endfor %}
+
+  <div class="pt-2 space-y-3">
+    <button type="submit" class="w-full px-4 py-2.5 text-white rounded-lg bg-indigo-600 hover:bg-indigo-700">Login</button>
+    <div class="flex items-center justify-between text-sm">
+      <a href="{% url 'users:password_reset' %}" class="text-sky-700 hover:underline">Forgot password?</a>
+      <a href="{% url 'users:register_options' %}" class="text-indigo-700 hover:underline">Create account</a>
+    </div>
+  </div>
+</form>
 {% endblock %}

@@ -1,55 +1,65 @@
 {% extends "base_accounts.html" %}
 {% load static widget_tweaks %}
-{% block title %}Register — ClassMark{% endblock %}
+{% block title %}Register - ClassMark{% endblock %}
 
 {% block content %}
-<div class="p-6 bg-white shadow-md rounded-xl">
-  <h2 class="mb-4 text-2xl font-semibold text-slate-900">Create an account</h2>
-  <p class="mb-6 text-sm text-slate-600">Register as a student or lecturer to start using QR attendance.</p>
+<h2 class="mb-2 text-2xl font-semibold text-slate-900">Create an account</h2>
+<p class="mb-6 text-sm text-slate-600">Register as a student or lecturer to start using QR attendance.</p>
 
-  <form method="post" class="space-y-4" id="register-form">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for field in form %}
-      <div data-field-name="{{ field.name }}" class="field-block">
-        <label class="block mb-1 text-sm font-medium text-slate-700" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field.errors }}
-        {{ field|add_class:"w-full px-3 py-2 border rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-300" }}
-        {% if field.help_text %}
-          <p class="mt-1 text-xs text-slate-400">{{ field.help_text }}</p>
-        {% endif %}
-      </div>
-    {% endfor %}
+{% if form.non_field_errors %}
+  <div class="auth-message auth-message-error mb-4">{{ form.non_field_errors }}</div>
+{% endif %}
 
-    <div class="flex items-center justify-between">
-      <button type="submit" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Register</button>
-      <a href="{% url 'users:login' %}" class="text-sm text-indigo-600 hover:underline">Already have an account?</a>
+<form method="post" class="space-y-4" id="register-form">
+  {% csrf_token %}
+  {% for field in form %}
+    <div data-field-name="{{ field.name }}" class="field-block">
+      <label class="block mb-1 text-sm font-medium text-slate-700" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {% if field.errors %}
+        <div class="auth-error-list">{{ field.errors }}</div>
+        {{ field|add_class:"auth-input auth-input-error" }}
+      {% else %}
+        {{ field|add_class:"auth-input" }}
+      {% endif %}
+      {% if field.help_text %}
+        <div class="auth-help">{{ field.help_text|safe }}</div>
+      {% endif %}
     </div>
-  </form>
-</div>
+  {% endfor %}
+
+  <div class="pt-2 space-y-3">
+    <button type="submit" class="w-full px-4 py-2.5 text-white rounded-lg bg-indigo-600 hover:bg-indigo-700">Register</button>
+    <div class="text-sm text-center">
+      <a href="{% url 'users:login' %}" class="text-indigo-700 hover:underline">Already have an account? Login</a>
+    </div>
+  </div>
+</form>
 {% endblock %}
 
+{% block scripts %}
+{{ block.super }}
 <script>
-  // show/hide identification field based on role selection
-  (function(){
-    const form = document.getElementById('register-form');
-    if(!form) return;
+  (function () {
+    const form = document.getElementById("register-form");
+    if (!form) return;
+
     const roleSelect = form.querySelector('[name="role"]');
     const identBlock = form.querySelector('[data-field-name="identification"]');
 
     function update() {
       const v = roleSelect && roleSelect.value;
-      if(!identBlock) return;
-      if(v === 'student' || v === 'lecturer') {
-        identBlock.style.display = '';
+      if (!identBlock) return;
+      if (v === "student" || v === "lecturer") {
+        identBlock.style.display = "";
       } else {
-        identBlock.style.display = 'none';
+        identBlock.style.display = "none";
       }
     }
 
-    if(roleSelect) {
-      roleSelect.addEventListener('change', update);
+    if (roleSelect) {
+      roleSelect.addEventListener("change", update);
       update();
     }
   })();
 </script>
+{% endblock %}

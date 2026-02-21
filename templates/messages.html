@@ -1,26 +1,13 @@
 {% if messages %}
-  <!-- Hidden Button to Trigger Modal -->
-  <button type="button" id="messageModalButton" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#messageModal">
-    Open modal
-  </button>
-
-  <!-- Modal for Messages -->
-  <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="messageModalLabel">Messages</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
+<div class="mb-4 space-y-2" aria-live="polite">
+  {% for message in messages %}
+    <div class="auth-message
+      {% if 'success' in message.tags %}auth-message-success{% endif %}
+      {% if 'error' in message.tags %}auth-message-error{% endif %}
+      {% if 'warning' in message.tags %}auth-message-warning{% endif %}
+      {% if 'info' in message.tags %}auth-message-info{% endif %}">
+      {{ message }}
     </div>
-  </div>
+  {% endfor %}
+</div>
 {% endif %}

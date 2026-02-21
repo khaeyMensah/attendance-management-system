@@ -1,24 +1,11 @@
-{% extends "base_accounts.html" %} {% block content %}
-<div class="flex justify-center">
-  <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md md:max-w-lg">
-    <h3 class="mb-4 text-2xl font-semibold text-gray-800">
-      Activation Failed!
-    </h3>
+{% extends "base_accounts.html" %}
+{% block title %}Activation Failed - ClassMark{% endblock %}
 
-    <div
-      class="px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded"
-    >
-      <p>The activation link is invalid or has expired.</p>
-    </div>
-
-    <div class="mt-4">
-      <a
-        href="{% url 'users:login' %}"
-        class="inline-block w-full px-4 py-2 font-medium text-center text-white bg-blue-600 rounded hover:bg-blue-700"
-      >
-        Return to log in
-      </a>
-    </div>
-  </div>
+{% block content %}
+<h2 class="mb-2 text-2xl font-semibold text-slate-900">Activation failed</h2>
+<div class="auth-message auth-message-error mb-5">The activation link is invalid or has expired.</div>
+<div class="space-y-3">
+  <a href="{% url 'users:login' %}" class="inline-block w-full px-4 py-2.5 text-center text-white rounded-lg bg-indigo-600 hover:bg-indigo-700">Return to login</a>
+  <a href="{% url 'users:register_options' %}" class="inline-block w-full px-4 py-2.5 text-center text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200">Register again</a>
 </div>
 {% endblock %}
