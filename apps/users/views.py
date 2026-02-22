@@ -12,23 +12,33 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db import transaction, IntegrityError
 from django.db.models import Q
+from django.urls import reverse
+from django.core import signing
+from django.core.signing import BadSignature, SignatureExpired
 
 from apps.users.forms import LoginForm, RegisterForm
 from apps.users.tokens import account_activation_token
 from apps.users.models import User
 
 logger = logging.getLogger(__name__)
+ADMIN_INVITE_SALT = 'users.admin_invite'
+ADMIN_INVITE_MAX_AGE = getattr(settings, 'ADMIN_INVITE_MAX_AGE', 60 * 60 * 24 * 7)
 
 
 def _send_activation_email(request, user):
     current_site = get_current_site(request)
     mail_subject = 'Activate your ClassMark account.'
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = account_activation_token.make_token(user)
+    activation_url = f"{'https' if request.is_secure() else 'http'}://{current_site.domain}"
+    activation_url += reverse('users:activate', kwargs={'uidb64': uid, 'token': token})
     message = render_to_string('authentication/acc_active_email.html', {
         'user': user,
         'domain': current_site.domain,
         'protocol': 'https' if request.is_secure() else 'http',
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': account_activation_token.make_token(user),
+        'uid': uid,
+        'token': token,
+        'activation_url': activation_url,
     })
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
     send_mail(mail_subject, message, from_email, [user.email], fail_silently=False)
@@ -54,6 +64,15 @@ def home(request):
 def register_options(request):
     """Present role selection before registration."""
     return render(request, 'accounts/register_options.html')
+
+
+def _prepare_admin_register_form(form, invited_email=None):
+    form.fields['role'].choices = [('admin', 'Admin')]
+    form.fields['role'].initial = 'admin'
+    if invited_email:
+        form.fields['email'].initial = invited_email
+        form.fields['email'].widget.attrs['readonly'] = True
+    return form
 
 
 def registration_pending(request):
@@ -101,6 +120,55 @@ def register_view(request):
         else:
             form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form, 'role': role})
+
+
+def admin_register_view(request, token):
+    try:
+        payload = signing.loads(token, salt=ADMIN_INVITE_SALT, max_age=ADMIN_INVITE_MAX_AGE)
+    except (BadSignature, SignatureExpired):
+        messages.error(request, 'This admin invite link is invalid or expired.')
+        return redirect('users:register_options')
+
+    invited_email = (payload.get('email') or '').strip().lower() or None
+
+    if request.method == 'POST':
+        form = _prepare_admin_register_form(RegisterForm(request.POST), invited_email=invited_email)
+        if form.is_valid():
+            if invited_email and form.cleaned_data['email'].strip().lower() != invited_email:
+                form.add_error('email', 'This invite is restricted to a specific email address.')
+            else:
+                try:
+                    with transaction.atomic():
+                        user = form.save(commit=False)
+                        user.role = 'admin'
+                        user.is_active = False
+                        user.save()
+                        _send_activation_email(request, user)
+                except IntegrityError as exc:
+                    error_text = str(exc)
+                    if 'users_user_username_key' in error_text:
+                        form.add_error('username', 'This username is already taken.')
+                    elif 'users_user_email_key' in error_text:
+                        form.add_error('email', 'This email is already registered.')
+                    else:
+                        form.add_error(None, 'A duplicate record was detected. Please use different details.')
+                except Exception as exc:
+                    logger.exception('Admin registration email send failed for %s', form.cleaned_data.get('email'))
+                    if settings.DEBUG:
+                        raise
+                    messages.error(
+                        request,
+                        f'We could not send your verification email right now: {exc}',
+                    )
+                else:
+                    messages.info(request, 'Admin account created. Please verify your email to activate it.')
+                    return redirect('users:registration_pending')
+    else:
+        initial = {'role': 'admin'}
+        if invited_email:
+            initial['email'] = invited_email
+        form = _prepare_admin_register_form(RegisterForm(initial=initial), invited_email=invited_email)
+    return render(request, 'accounts/register.html', {'form': form, 'role': 'admin'})
 
 
 def resend_activation_email(request):

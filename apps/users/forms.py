@@ -13,6 +13,13 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ("username", "full_name", "email", "role", "password1", "password2")
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['role'].choices = [
+            ('student', 'Student'),
+            ('lecturer', 'Lecturer'),
+        ]
+
     def clean(self):
         cleaned = super().clean()
         role = cleaned.get('role')

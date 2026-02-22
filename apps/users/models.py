@@ -34,6 +34,14 @@ class User(AbstractUser):
     staff_id = models.CharField(max_length=20, unique=True, null=True, blank=True, help_text="Lecturer's staff identification number") 
     email = models.EmailField(max_length=50, unique=True, help_text="User's email address")
     full_name = models.CharField(max_length=50, help_text="User's full name")
+
+    def save(self, *args, **kwargs):
+        # Keep Django admin access aligned with the explicit role.
+        if self.role == 'admin':
+            self.is_staff = True
+        elif not self.is_superuser:
+            self.is_staff = False
+        super().save(*args, **kwargs)
     
     def is_student(self):
         return self.role == 'student'
