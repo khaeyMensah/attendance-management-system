@@ -4,6 +4,7 @@
   align-items: stretch;
   min-height: 0;
   position: relative;
+  overflow-x: hidden;
 }
 .dashboard-sidebar {
   width: 280px;
@@ -12,6 +13,10 @@
 .dashboard-sidebar nav {
   height: 100%;
   border-radius: 0;
+}
+.dashboard-content {
+  min-width: 0;
+  width: 100%;
 }
 .sidebar-link {
   position: relative;
