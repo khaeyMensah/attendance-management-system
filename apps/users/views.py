@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+import logging
 from apps.users.decorators import role_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -9,11 +10,27 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db import transaction
+from django.db import transaction, IntegrityError
 
 from apps.users.forms import LoginForm, RegisterForm
 from apps.users.tokens import account_activation_token
 from apps.users.models import User
+
+logger = logging.getLogger(__name__)
+
+
+def _send_activation_email(request, user):
+    current_site = get_current_site(request)
+    mail_subject = 'Activate your ClassMark account.'
+    message = render_to_string('authentication/acc_active_email.html', {
+        'user': user,
+        'domain': current_site.domain,
+        'protocol': 'https' if request.is_secure() else 'http',
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    })
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
+    send_mail(mail_subject, message, from_email, [user.email], fail_silently=False)
 
 
 # Create your views here.
@@ -38,6 +55,10 @@ def register_options(request):
     return render(request, 'accounts/register_options.html')
 
 
+def registration_pending(request):
+    return render(request, 'authentication/registration_pending.html')
+
+
 def register_view(request):
     # allow role to be preselected via query param or POST
     role = request.GET.get('role') or request.POST.get('role')
@@ -47,24 +68,28 @@ def register_view(request):
             try:
                 with transaction.atomic():
                     user = form.save(commit=False)
-                    # mark inactive until email verification
                     user.is_active = False
                     user.save()
-                    # send verification email
-                    current_site = get_current_site(request)
-                    mail_subject = 'Activate your ClassMark account.'
-                    message = render_to_string('authentication/acc_active_email.html', {
-                        'user': user,
-                        'domain': current_site.domain,
-                        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                        'token': account_activation_token.make_token(user),
-                    })
-                    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
-                    send_mail(mail_subject, message, from_email, [user.email], fail_silently=False)
-            except Exception:
+                    _send_activation_email(request, user)
+            except IntegrityError as exc:
+                error_text = str(exc)
+                if 'users_user_username_key' in error_text:
+                    form.add_error('username', 'This username is already taken.')
+                elif 'users_user_email_key' in error_text:
+                    form.add_error('email', 'This email is already registered.')
+                elif 'users_user_student_id_key' in error_text:
+                    form.add_error('identification', 'This student ID is already registered.')
+                elif 'users_user_staff_id_key' in error_text:
+                    form.add_error('identification', 'This staff ID is already registered.')
+                else:
+                    form.add_error(None, 'A duplicate record was detected. Please use different details.')
+            except Exception as exc:
+                logger.exception('Registration email send failed for %s', form.cleaned_data.get('email'))
+                if settings.DEBUG:
+                    raise
                 messages.error(
                     request,
-                    'We could not send your verification email right now. Please try registering again in a moment.',
+                    f'We could not send your verification email right now: {exc}',
                 )
             else:
                 return redirect('users:registration_pending')
@@ -75,6 +100,33 @@ def register_view(request):
         else:
             form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form, 'role': role})
+
+
+def resend_activation_email(request):
+    if request.method != 'POST':
+        return redirect('users:registration_pending')
+
+    email = (request.POST.get('email') or '').strip()
+    if not email:
+        messages.error(request, 'Enter your email address to resend the activation link.')
+        return redirect('users:registration_pending')
+
+    user = User.objects.filter(email=email, is_active=False).first()
+    if user:
+        try:
+            _send_activation_email(request, user)
+        except Exception:
+            logger.exception('Resend activation failed for %s', email)
+            if settings.DEBUG:
+                raise
+            messages.error(request, 'We could not resend the activation email right now. Please try again.')
+            return redirect('users:registration_pending')
+
+    messages.success(
+        request,
+        'If an inactive account exists for that email, a new activation link has been sent.',
+    )
+    return redirect('users:registration_pending')
 
 
 def activate(request, uidb64, token):
