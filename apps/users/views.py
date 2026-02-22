@@ -54,7 +54,7 @@ def home(request):
         if role == 'lecturer':
             return redirect('users:lecturer_dashboard')
         if role == 'admin':
-            return redirect('admin:index')
+            return redirect('users:admin_dashboard')
     # Unauthenticated users see the public landing (base template default hero)
     return render(request, 'base.html')
     # return render(request, 'base.html')
@@ -225,6 +225,8 @@ def login_view(request):
                 return redirect('users:student_dashboard')
             if user.role == 'lecturer':
                 return redirect('users:lecturer_dashboard')
+            if user.role == 'admin':
+                return redirect('users:admin_dashboard')
             return redirect('home')
         login_value = (request.POST.get('username') or '').strip()
         raw_password = request.POST.get('password') or ''
