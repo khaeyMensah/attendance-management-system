@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 
 from apps.users.forms import LoginForm, RegisterForm
 from apps.users.tokens import account_activation_token
@@ -157,6 +158,29 @@ def login_view(request):
             if user.role == 'lecturer':
                 return redirect('users:lecturer_dashboard')
             return redirect('home')
+        login_value = (request.POST.get('username') or '').strip()
+        raw_password = request.POST.get('password') or ''
+        inactive_user = User.objects.filter(
+            Q(username=login_value) | Q(email=login_value),
+            is_active=False,
+        ).first()
+        if inactive_user and raw_password and inactive_user.check_password(raw_password):
+            try:
+                _send_activation_email(request, inactive_user)
+            except Exception:
+                logger.exception('Resend activation from login failed for %s', inactive_user.email)
+                if settings.DEBUG:
+                    raise
+                messages.warning(
+                    request,
+                    'Your account is not verified yet. Please check your email for the activation link.',
+                )
+            else:
+                messages.info(
+                    request,
+                    'Your account is not verified yet. We sent a new activation email.',
+                )
+            return redirect('users:registration_pending')
     else:
         form = LoginForm(request)
     return render(request, 'accounts/login.html', {'form': form})
