@@ -1,0 +1,8 @@
+Hi {{ user.username }},
+
+Thank you for registering for ClassMark.
+Please verify your email and activate your account using this link:
+
+{{ activation_url }}
+
+If you did not create this account, you can ignore this email.

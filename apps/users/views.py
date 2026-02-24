@@ -9,7 +9,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.db import transaction, IntegrityError, DataError
 from django.db.models import Q
 from django.urls import reverse
@@ -32,16 +32,20 @@ def _send_activation_email(request, user):
     token = account_activation_token.make_token(user)
     activation_url = f"{'https' if request.is_secure() else 'http'}://{current_site.domain}"
     activation_url += reverse('users:activate', kwargs={'uidb64': uid, 'token': token})
-    message = render_to_string('authentication/acc_active_email.html', {
+    context = {
         'user': user,
         'domain': current_site.domain,
         'protocol': 'https' if request.is_secure() else 'http',
         'uid': uid,
         'token': token,
         'activation_url': activation_url,
-    })
+    }
+    text_message = render_to_string('authentication/acc_active_email.txt', context)
+    html_message = render_to_string('authentication/acc_active_email.html', context)
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
-    send_mail(mail_subject, message, from_email, [user.email], fail_silently=False)
+    email = EmailMultiAlternatives(mail_subject, text_message, from_email, [user.email])
+    email.attach_alternative(html_message, 'text/html')
+    email.send(fail_silently=False)
 
 
 # Create your views here.
@@ -76,7 +80,12 @@ def _prepare_admin_register_form(form, invited_email=None):
 
 
 def registration_pending(request):
-    return render(request, 'authentication/registration_pending.html')
+    pending_email = request.session.get('pending_activation_email')
+    return render(
+        request,
+        'authentication/registration_pending.html',
+        {'pending_email': pending_email},
+    )
 
 
 def register_view(request):
@@ -114,6 +123,7 @@ def register_view(request):
                     f'We could not send your verification email right now: {exc}',
                 )
             else:
+                request.session['pending_activation_email'] = user.email
                 return redirect('users:registration_pending')
     else:
         # if role provided, initialize the form with that role
@@ -164,6 +174,7 @@ def admin_register_view(request, token):
                     )
                 else:
                     messages.info(request, 'Admin account created. Please verify your email to activate it.')
+                    request.session['pending_activation_email'] = user.email
                     return redirect('users:registration_pending')
     else:
         initial = {'role': 'admin'}
@@ -177,15 +188,16 @@ def resend_activation_email(request):
     if request.method != 'POST':
         return redirect('users:registration_pending')
 
-    email = (request.POST.get('email') or '').strip()
+    email = (request.POST.get('email') or request.session.get('pending_activation_email') or '').strip()
     if not email:
-        messages.error(request, 'Enter your email address to resend the activation link.')
+        messages.error(request, 'No pending email was found. Please enter your email or register again.')
         return redirect('users:registration_pending')
 
     user = User.objects.filter(email=email, is_active=False).first()
     if user:
         try:
             _send_activation_email(request, user)
+            request.session['pending_activation_email'] = user.email
         except Exception:
             logger.exception('Resend activation failed for %s', email)
             if settings.DEBUG:
@@ -239,6 +251,7 @@ def login_view(request):
         if inactive_user and raw_password and inactive_user.check_password(raw_password):
             try:
                 _send_activation_email(request, inactive_user)
+                request.session['pending_activation_email'] = inactive_user.email
             except Exception:
                 logger.exception('Resend activation from login failed for %s', inactive_user.email)
                 if settings.DEBUG:
