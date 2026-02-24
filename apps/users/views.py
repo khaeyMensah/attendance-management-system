@@ -99,7 +99,6 @@ def register_view(request):
                     user = form.save(commit=False)
                     user.is_active = False
                     user.save()
-                    _send_activation_email(request, user)
             except (IntegrityError, DataError) as exc:
                 error_text = str(exc)
                 if 'users_user_username_key' in error_text:
@@ -116,14 +115,16 @@ def register_view(request):
                     form.add_error(None, 'A duplicate record was detected. Please use different details.')
             except Exception as exc:
                 logger.exception('Registration email send failed for %s', form.cleaned_data.get('email'))
-                if settings.DEBUG:
-                    raise
                 messages.error(
                     request,
                     f'We could not send your verification email right now: {exc}',
                 )
             else:
                 request.session['pending_activation_email'] = user.email
+                messages.info(
+                    request,
+                    'Account created. Click resend on the next page to receive your activation link.',
+                )
                 return redirect('users:registration_pending')
     else:
         # if role provided, initialize the form with that role
@@ -155,7 +156,6 @@ def admin_register_view(request, token):
                         user.role = 'admin'
                         user.is_active = False
                         user.save()
-                        _send_activation_email(request, user)
                 except IntegrityError as exc:
                     error_text = str(exc)
                     if 'users_user_username_key' in error_text:
@@ -166,14 +166,15 @@ def admin_register_view(request, token):
                         form.add_error(None, 'A duplicate record was detected. Please use different details.')
                 except Exception as exc:
                     logger.exception('Admin registration email send failed for %s', form.cleaned_data.get('email'))
-                    if settings.DEBUG:
-                        raise
                     messages.error(
                         request,
                         f'We could not send your verification email right now: {exc}',
                     )
                 else:
-                    messages.info(request, 'Admin account created. Please verify your email to activate it.')
+                    messages.info(
+                        request,
+                        'Admin account created. Click resend on the next page to receive your activation link.',
+                    )
                     request.session['pending_activation_email'] = user.email
                     return redirect('users:registration_pending')
     else:
@@ -200,8 +201,6 @@ def resend_activation_email(request):
             request.session['pending_activation_email'] = user.email
         except Exception:
             logger.exception('Resend activation failed for %s', email)
-            if settings.DEBUG:
-                raise
             messages.error(request, 'We could not resend the activation email right now. Please try again.')
             return redirect('users:registration_pending')
 
@@ -249,22 +248,11 @@ def login_view(request):
             is_active=False,
         ).first()
         if inactive_user and raw_password and inactive_user.check_password(raw_password):
-            try:
-                _send_activation_email(request, inactive_user)
-                request.session['pending_activation_email'] = inactive_user.email
-            except Exception:
-                logger.exception('Resend activation from login failed for %s', inactive_user.email)
-                if settings.DEBUG:
-                    raise
-                messages.warning(
-                    request,
-                    'Your account is not verified yet. Please check your email for the activation link.',
-                )
-            else:
-                messages.info(
-                    request,
-                    'Your account is not verified yet. We sent a new activation email.',
-                )
+            request.session['pending_activation_email'] = inactive_user.email
+            messages.info(
+                request,
+                'Your account is not verified yet. Click resend on the next page to get a new activation link.',
+            )
             return redirect('users:registration_pending')
     else:
         form = LoginForm(request)
