@@ -23,11 +23,16 @@ class RegisterForm(UserCreationForm):
     def clean(self):
         cleaned = super().clean()
         role = cleaned.get('role')
-        identification = cleaned.get('identification')
+        identification = (cleaned.get('identification') or '').strip()
 
         # Require identification for student and lecturer roles
         if role in ('student', 'lecturer') and not identification:
             raise forms.ValidationError('An ID is required for the selected role.')
+
+        if role == 'student' and identification and len(identification) > 10:
+            self.add_error('identification', 'Student ID cannot exceed 10 characters.')
+        if role == 'lecturer' and identification and len(identification) > 20:
+            self.add_error('identification', 'Staff ID cannot exceed 20 characters.')
 
         # Ensure identification is unique for the appropriate model field
         if identification:
@@ -47,15 +52,16 @@ class RegisterForm(UserCreationForm):
         if role and hasattr(user, 'role'):
             setattr(user, 'role', role)
 
-        # attempt to save identification to a sensible field if it exists
-        ident = self.cleaned_data.get('identification')
+        ident = (self.cleaned_data.get('identification') or '').strip()
+        if hasattr(user, 'student_id'):
+            user.student_id = None
+        if hasattr(user, 'staff_id'):
+            user.staff_id = None
         if ident:
-            if hasattr(user, 'identification'):
-                setattr(user, 'identification', ident)
-            elif hasattr(user, 'student_id'):
-                setattr(user, 'student_id', ident)
-            elif hasattr(user, 'staff_id'):
-                setattr(user, 'staff_id', ident)
+            if role == 'student' and hasattr(user, 'student_id'):
+                user.student_id = ident
+            elif role == 'lecturer' and hasattr(user, 'staff_id'):
+                user.staff_id = ident
 
         if commit:
             user.save()

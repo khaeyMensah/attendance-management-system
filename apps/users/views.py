@@ -10,7 +10,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db import transaction, IntegrityError
+from django.db import transaction, IntegrityError, DataError
 from django.db.models import Q
 from django.urls import reverse
 from django.core import signing
@@ -91,7 +91,7 @@ def register_view(request):
                     user.is_active = False
                     user.save()
                     _send_activation_email(request, user)
-            except IntegrityError as exc:
+            except (IntegrityError, DataError) as exc:
                 error_text = str(exc)
                 if 'users_user_username_key' in error_text:
                     form.add_error('username', 'This username is already taken.')
@@ -101,6 +101,8 @@ def register_view(request):
                     form.add_error('identification', 'This student ID is already registered.')
                 elif 'users_user_staff_id_key' in error_text:
                     form.add_error('identification', 'This staff ID is already registered.')
+                elif 'value too long' in error_text.lower():
+                    form.add_error('identification', 'The ID entered is too long for the selected role.')
                 else:
                     form.add_error(None, 'A duplicate record was detected. Please use different details.')
             except Exception as exc:
