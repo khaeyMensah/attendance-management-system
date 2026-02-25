@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 
 
@@ -35,7 +36,36 @@ class User(AbstractUser):
     email = models.EmailField(max_length=50, unique=True, help_text="User's email address")
     full_name = models.CharField(max_length=50, help_text="User's full name")
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='users_role_ids_valid',
+                condition=(
+                    (
+                        Q(role='student')
+                        & Q(student_id__isnull=False)
+                        & ~Q(student_id='')
+                        & Q(staff_id__isnull=True)
+                    )
+                    | (
+                        Q(role='lecturer')
+                        & Q(staff_id__isnull=False)
+                        & ~Q(staff_id='')
+                        & Q(student_id__isnull=True)
+                    )
+                    | (
+                        Q(role='admin')
+                        & Q(student_id__isnull=True)
+                        & Q(staff_id__isnull=True)
+                    )
+                ),
+            ),
+        ]
+
     def save(self, *args, **kwargs):
+        if self.is_superuser and not self.role:
+            self.role = 'admin'
+
         # Keep Django admin access aligned with the explicit role.
         if self.role == 'admin':
             self.is_staff = True

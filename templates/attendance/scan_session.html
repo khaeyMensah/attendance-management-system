@@ -1,0 +1,37 @@
+{% extends "users/dashboard_shell.html" %}
+{% block dashboard_title %}Confirm Attendance - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}Confirm Attendance{% endblock dashboard_heading %}
+{% block dashboard_subheading %}{{ session.course.code }} - {{ session.course.title }}{% endblock dashboard_subheading %}
+
+{% block dashboard_actions %}
+<div class="mt-6 max-w-2xl space-y-4">
+  <div class="rounded-lg border bg-slate-50 p-4">
+    <p><span class="font-medium">Lecturer:</span> {{ session.course.lecturer.full_name|default:session.course.lecturer.username }}</p>
+    <p><span class="font-medium">Starts:</span> {{ session.start_time|date:"M d, Y H:i" }}</p>
+    <p><span class="font-medium">Ends:</span> {{ session.end_time|date:"M d, Y H:i" }}</p>
+    <p><span class="font-medium">Session Status:</span> {% if is_open %}Open{% else %}Closed{% endif %}</p>
+  </div>
+
+  {% if not enrolled %}
+    <div class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-700">
+      You are not enrolled in this course, so attendance cannot be submitted.
+    </div>
+  {% elif existing_record %}
+    <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+      Attendance already recorded at {{ existing_record.check_in_time|date:"M d, Y H:i" }}.
+    </div>
+  {% elif not is_open %}
+    <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800">
+      This session is currently closed.
+    </div>
+  {% else %}
+    <form method="post" class="rounded-lg border bg-white p-4">
+      {% csrf_token %}
+      <p class="text-sm text-slate-600">Press confirm to mark yourself present for this class session.</p>
+      <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+        Confirm Presence
+      </button>
+    </form>
+  {% endif %}
+</div>
+{% endblock dashboard_actions %}

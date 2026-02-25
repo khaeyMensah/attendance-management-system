@@ -1,0 +1,32 @@
+{% extends "users/dashboard_shell.html" %}
+{% block dashboard_title %}Session QR - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}Session QR{% endblock dashboard_heading %}
+{% block dashboard_subheading %}Course {{ session.course.code }} | Session starts {{ session.start_time|date:"M d, Y H:i" }}{% endblock dashboard_subheading %}
+
+{% block dashboard_actions %}
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="rounded-lg border p-4 bg-slate-50">
+    <h2 class="text-base font-semibold">Scan URL</h2>
+    <p class="mt-2 text-sm text-slate-600 break-all">{{ scan_url }}</p>
+    <div class="mt-4 text-sm">
+      <p><span class="font-medium">Access Code:</span> <span class="font-mono tracking-wide">{{ session.access_code }}</span></p>
+      <p><span class="font-medium">Ends:</span> {{ session.end_time|date:"M d, Y H:i" }}</p>
+      <p><span class="font-medium">Status:</span> {% if session.is_active %}Active{% else %}Closed{% endif %}</p>
+    </div>
+  </div>
+  <div class="rounded-lg border p-4 bg-white">
+    <h2 class="text-base font-semibold">QR Code</h2>
+    <div class="mt-3">
+      <img src="{{ qr_image_url }}" alt="Session QR Code" class="w-72 h-72 max-w-full border rounded-md" />
+    </div>
+  </div>
+</div>
+<div class="mt-6 flex flex-wrap gap-2">
+  <a href="{% url 'attendance:session_records' session.id %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50">View Records</a>
+  <form method="post" action="{% url 'attendance:close_session' session.id %}">
+    {% csrf_token %}
+    <button type="submit" class="inline-flex items-center rounded-md bg-rose-600 px-4 py-2 text-white hover:bg-rose-700">Close Session</button>
+  </form>
+  <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Back to Dashboard</a>
+</div>
+{% endblock dashboard_actions %}

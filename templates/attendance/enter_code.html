@@ -1,0 +1,31 @@
+{% extends "users/dashboard_shell.html" %}
+{% block dashboard_title %}Enter Attendance Code - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}Enter Attendance Code{% endblock dashboard_heading %}
+{% block dashboard_subheading %}Use the code shown by your lecturer if you cannot scan the QR code.{% endblock dashboard_subheading %}
+
+{% block dashboard_actions %}
+<div class="mt-6 max-w-md rounded-lg border bg-slate-50 p-4">
+  <form method="post" class="space-y-3">
+    {% csrf_token %}
+    <div>
+      <label for="{{ form.access_code.id_for_label }}" class="block text-sm font-medium text-slate-700">Code</label>
+      <input
+        id="{{ form.access_code.id_for_label }}"
+        name="{{ form.access_code.html_name }}"
+        type="text"
+        value="{{ form.access_code.value|default:'' }}"
+        maxlength="8"
+        minlength="6"
+        class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 uppercase"
+        required
+      />
+      {% for error in form.access_code.errors %}
+        <p class="mt-1 text-xs text-rose-700">{{ error }}</p>
+      {% endfor %}
+    </div>
+    <button type="submit" class="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+      Continue
+    </button>
+  </form>
+</div>
+{% endblock dashboard_actions %}

@@ -1,0 +1,59 @@
+{% extends "users/dashboard_shell.html" %}
+{% block dashboard_title %}Course Sessions - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}{{ course.code }} - {{ course.title }}{% endblock dashboard_heading %}
+{% block dashboard_subheading %}Sessions and attendance records for this course.{% endblock dashboard_subheading %}
+
+{% block dashboard_stats %}
+<div class="mt-6 grid gap-4 sm:grid-cols-2">
+  <div class="rounded-lg border bg-white p-4">
+    <div class="text-sm text-slate-500">Enrolled Students</div>
+    <div class="text-2xl font-bold">{{ enrolled_students_count }}</div>
+  </div>
+  <div class="rounded-lg border bg-white p-4">
+    <div class="text-sm text-slate-500">Total Sessions</div>
+    <div class="text-2xl font-bold">{{ sessions|length }}</div>
+  </div>
+</div>
+{% endblock dashboard_stats %}
+
+{% block dashboard_actions %}
+<div class="mt-6 flex flex-wrap gap-2">
+  <a href="{% url 'attendance:start_session' course.id %}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Start Session</a>
+  <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50">Back to Dashboard</a>
+</div>
+
+<div class="mt-6 overflow-x-auto border rounded-lg max-w-full">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-50 text-slate-600">
+      <tr>
+        <th class="px-4 py-3 text-left">Session Start</th>
+        <th class="px-4 py-3 text-left">Session End</th>
+        <th class="px-4 py-3 text-left">Status</th>
+        <th class="px-4 py-3 text-left">Present</th>
+        <th class="px-4 py-3 text-left">Absent</th>
+        <th class="px-4 py-3 text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for session in sessions %}
+        <tr class="border-t">
+          <td class="px-4 py-3">{{ session.start_time|date:"M d, Y H:i" }}</td>
+          <td class="px-4 py-3">{{ session.end_time|date:"M d, Y H:i" }}</td>
+          <td class="px-4 py-3">{% if session.is_active %}Active{% else %}Closed{% endif %}</td>
+          <td class="px-4 py-3">{{ session.present_count }}</td>
+          <td class="px-4 py-3">{{ session.absent_count }}</td>
+          <td class="px-4 py-3">
+            <a href="{% url 'attendance:session_records' session.id %}" class="text-indigo-700 hover:underline">Records</a>
+            <span class="text-slate-300 px-1">|</span>
+            <a href="{% url 'attendance:session_qr' session.id %}" class="text-indigo-700 hover:underline">QR</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr class="border-t">
+          <td class="px-4 py-3 text-slate-500" colspan="6">No sessions created yet.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock dashboard_actions %}

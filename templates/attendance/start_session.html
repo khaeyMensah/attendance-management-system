@@ -1,0 +1,35 @@
+{% extends "users/dashboard_shell.html" %}
+{% block dashboard_title %}Start Session - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}Start Session{% endblock dashboard_heading %}
+{% block dashboard_subheading %}Create a new attendance session for {{ course.code }} - {{ course.title }}.{% endblock dashboard_subheading %}
+
+{% block dashboard_actions %}
+<div class="mt-6 max-w-lg rounded-lg border bg-slate-50 p-4">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="{{ form.duration_minutes.id_for_label }}" class="block text-sm font-medium text-slate-700">Duration (minutes)</label>
+      <input
+        id="{{ form.duration_minutes.id_for_label }}"
+        name="{{ form.duration_minutes.html_name }}"
+        type="number"
+        min="5"
+        max="360"
+        value="{{ form.duration_minutes.value|default:90 }}"
+        class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
+        required
+      />
+      {% if form.duration_minutes.help_text %}
+        <p class="mt-1 text-xs text-slate-500">{{ form.duration_minutes.help_text }}</p>
+      {% endif %}
+      {% for error in form.duration_minutes.errors %}
+        <p class="mt-1 text-xs text-rose-700">{{ error }}</p>
+      {% endfor %}
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Start Session</button>
+      <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-white">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock dashboard_actions %}
