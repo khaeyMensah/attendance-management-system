@@ -61,7 +61,6 @@ def home(request):
             return redirect('users:admin_dashboard')
     # Unauthenticated users see the public landing (base template default hero)
     return render(request, 'base.html')
-    # return render(request, 'base.html')
     # return render(request, 'authentication/registration_pending.html')
 
 
@@ -121,10 +120,6 @@ def register_view(request):
                 )
             else:
                 request.session['pending_activation_email'] = user.email
-                messages.info(
-                    request,
-                    'Account created. Click resend on the next page to receive your activation link.',
-                )
                 return redirect('users:registration_pending')
     else:
         # if role provided, initialize the form with that role
@@ -171,10 +166,6 @@ def admin_register_view(request, token):
                         f'We could not send your verification email right now: {exc}',
                     )
                 else:
-                    messages.info(
-                        request,
-                        'Admin account created. Click resend on the next page to receive your activation link.',
-                    )
                     request.session['pending_activation_email'] = user.email
                     return redirect('users:registration_pending')
     else:
@@ -249,9 +240,9 @@ def login_view(request):
         ).first()
         if inactive_user and raw_password and inactive_user.check_password(raw_password):
             request.session['pending_activation_email'] = inactive_user.email
-            messages.info(
+            messages.warning(
                 request,
-                'Your account is not verified yet. Click resend on the next page to get a new activation link.',
+                'Your account is not verified yet.',
             )
             return redirect('users:registration_pending')
     else:
