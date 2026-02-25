@@ -120,6 +120,16 @@ def register_view(request):
                 )
             else:
                 request.session['pending_activation_email'] = user.email
+                try:
+                    _send_activation_email(request, user)
+                except Exception:
+                    logger.exception('Activation email send failed after registration for %s', user.email)
+                    messages.warning(
+                        request,
+                        'Account created, but we could not send the activation email. Use resend.',
+                    )
+                else:
+                    messages.info(request, 'Activation email sent. Please check your inbox.')
                 return redirect('users:registration_pending')
     else:
         # if role provided, initialize the form with that role
@@ -167,6 +177,16 @@ def admin_register_view(request, token):
                     )
                 else:
                     request.session['pending_activation_email'] = user.email
+                    try:
+                        _send_activation_email(request, user)
+                    except Exception:
+                        logger.exception('Activation email send failed after admin registration for %s', user.email)
+                        messages.warning(
+                            request,
+                            'Admin account created, but we could not send the activation email. Use resend.',
+                        )
+                    else:
+                        messages.info(request, 'Activation email sent. Please check your inbox.')
                     return redirect('users:registration_pending')
     else:
         initial = {'role': 'admin'}
@@ -182,7 +202,7 @@ def resend_activation_email(request):
 
     email = (request.POST.get('email') or request.session.get('pending_activation_email') or '').strip()
     if not email:
-        messages.error(request, 'No pending email was found. Please enter your email or register again.')
+        messages.error(request, 'No pending email found. Enter your email to resend.')
         return redirect('users:registration_pending')
 
     user = User.objects.filter(email=email, is_active=False).first()
@@ -192,12 +212,12 @@ def resend_activation_email(request):
             request.session['pending_activation_email'] = user.email
         except Exception:
             logger.exception('Resend activation failed for %s', email)
-            messages.error(request, 'We could not resend the activation email right now. Please try again.')
+            messages.error(request, 'We could not send the activation email right now. Please try again.')
             return redirect('users:registration_pending')
 
     messages.success(
         request,
-        'If an inactive account exists for that email, a new activation link has been sent.',
+        'If an inactive account exists for that email, an activation link has been sent.',
     )
     return redirect('users:registration_pending')
 
@@ -240,10 +260,16 @@ def login_view(request):
         ).first()
         if inactive_user and raw_password and inactive_user.check_password(raw_password):
             request.session['pending_activation_email'] = inactive_user.email
-            messages.warning(
-                request,
-                'Your account is not verified yet.',
-            )
+            try:
+                _send_activation_email(request, inactive_user)
+            except Exception:
+                logger.exception('Activation email send failed during inactive login for %s', inactive_user.email)
+                messages.warning(
+                    request,
+                    'Your account is not verified. We could not send an email; use resend.',
+                )
+            else:
+                messages.info(request, 'Your account is not verified. A new activation email has been sent.')
             return redirect('users:registration_pending')
     else:
         form = LoginForm(request)

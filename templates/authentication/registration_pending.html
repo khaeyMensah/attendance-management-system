@@ -4,7 +4,7 @@
 {% block content %}
 <h2 class="mb-2 text-2xl font-semibold text-slate-900">Registration pending</h2>
 <div class="auth-message auth-message-info mb-3">
-  Your account is awaiting email verification. Click resend to receive a fresh activation link.
+  Check your email for an activation link. If it has not arrived yet, use resend.
 </div>
 <p class="text-sm text-slate-600">If you cannot find the email, check your spam folder.</p>
 
@@ -13,7 +13,7 @@
   {% if pending_email %}
     <p class="text-sm text-slate-600">Send another link to <strong>{{ pending_email }}</strong>.</p>
     <button type="submit" class="w-full px-4 py-2.5 text-white rounded-lg bg-indigo-600 hover:bg-indigo-700">
-      Resend activation link
+      Resend email
     </button>
   {% else %}
     <label for="resend-email" class="block text-sm font-medium text-slate-700">Resend activation email</label>
@@ -26,7 +26,7 @@
       placeholder="Enter your registration email"
     />
     <button type="submit" class="w-full px-4 py-2.5 text-white rounded-lg bg-indigo-600 hover:bg-indigo-700">
-      Resend activation link
+      Resend email
     </button>
   {% endif %}
 </form>
