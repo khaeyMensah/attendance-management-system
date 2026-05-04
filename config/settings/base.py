@@ -15,6 +15,24 @@ from decouple import config, Csv
 import os
 import dj_database_url
 
+def env_bool(name, default=False):
+    """
+    Parse boolean env vars safely.
+    Falls back to `default` instead of crashing on unexpected strings.
+    """
+    raw_value = config(name, default=default)
+    if isinstance(raw_value, bool):
+        return raw_value
+
+    value = str(raw_value).strip().lower()
+    truthy = {'1', 'true', 't', 'yes', 'y', 'on'}
+    falsy = {'0', 'false', 'f', 'no', 'n', 'off', ''}
+    if value in truthy:
+        return True
+    if value in falsy:
+        return False
+    return default
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -26,7 +44,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = env_bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'], cast=Csv())
  
@@ -142,10 +160,11 @@ NPM_BIN_PATH = "D:/Program Files/nodejs/npm.cmd"
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default=config('SENDGRID_API_KEY', default=''))
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=20, cast=int)
+
 
 
