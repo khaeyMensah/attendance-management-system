@@ -74,4 +74,3 @@ class AttendanceRecord(models.Model):
             if self.status == 'present' and not self.session.is_open():
                 raise ValidationError({'session': 'Attendance can only be logged while session is active.'})
     
-    
