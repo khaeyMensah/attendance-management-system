@@ -10,14 +10,14 @@
       <span class="sidebar-label">Dashboard</span>
     </a>
 
-    <a class="sidebar-link flex items-center gap-4 rounded-lg px-5 py-2 hover:bg-slate-700 mb-1" href="{% url 'users:student_dashboard' %}#scan-qr" data-tooltip="Scan QR Code">
+    <a class="sidebar-link flex items-center gap-4 rounded-lg px-5 py-2 hover:bg-slate-700 mb-1" href="{% url 'attendance:enter_code' %}" data-tooltip="Scan QR Code">
       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9V9z"/>
       </svg>
       <span class="sidebar-label">Scan QR Code</span>
     </a>
 
-    <a class="sidebar-link flex items-center gap-4 rounded-lg px-5 py-2 hover:bg-slate-700 mb-1" href="{% url 'users:student_dashboard' %}#attendance" data-tooltip="My Attendance">
+    <a class="sidebar-link flex items-center gap-4 rounded-lg px-5 py-2 hover:bg-slate-700 mb-1" href="{% url 'attendance:my_attendance' %}" data-tooltip="My Attendance">
       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M4 6h16M4 12h4m-4 6h16"/>
       </svg>

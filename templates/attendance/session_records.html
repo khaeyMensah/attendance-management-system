@@ -1,0 +1,56 @@
+{% extends "users/dashboard_shell.html" %}
+{% block dashboard_title %}Session Records - ClassMark{% endblock dashboard_title %}
+{% block dashboard_heading %}Session Records{% endblock dashboard_heading %}
+{% block dashboard_subheading %}{{ session.course.code }} | {{ session.start_time|date:"M d, Y H:i" }}{% endblock dashboard_subheading %}
+
+{% block dashboard_stats %}
+<div class="mt-6 grid gap-4 sm:grid-cols-3">
+  <div class="rounded-lg border bg-white p-4">
+    <div class="text-sm text-slate-500">Enrolled Students</div>
+    <div class="text-2xl font-bold">{{ enrolled_count }}</div>
+  </div>
+  <div class="rounded-lg border bg-white p-4">
+    <div class="text-sm text-slate-500">Present</div>
+    <div class="text-2xl font-bold text-green-600">{{ present_count }}</div>
+  </div>
+  <div class="rounded-lg border bg-white p-4">
+    <div class="text-sm text-slate-500">Absent</div>
+    <div class="text-2xl font-bold text-red-600">{{ absent_count }}</div>
+  </div>
+</div>
+{% endblock dashboard_stats %}
+
+{% block dashboard_actions %}
+<div class="mt-6 flex flex-wrap gap-2">
+  <a href="{% url 'attendance:session_qr' session.id %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50">Open QR Page</a>
+  <a href="{% url 'courses:lecturer_course_detail' session.course.id %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50">Back to Course</a>
+  <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Dashboard</a>
+</div>
+
+<div class="mt-6 overflow-x-auto border rounded-lg max-w-full">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-50 text-slate-600">
+      <tr>
+        <th class="px-4 py-3 text-left">Student</th>
+        <th class="px-4 py-3 text-left">Student ID</th>
+        <th class="px-4 py-3 text-left">Status</th>
+        <th class="px-4 py-3 text-left">Checked In</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in records %}
+        <tr class="border-t">
+          <td class="px-4 py-3">{{ row.student.full_name|default:row.student.username }}</td>
+          <td class="px-4 py-3">{{ row.student.student_id|default:"-" }}</td>
+          <td class="px-4 py-3 capitalize">{{ row.status }}</td>
+          <td class="px-4 py-3">{{ row.check_in_time|date:"M d, Y H:i" }}</td>
+        </tr>
+      {% empty %}
+        <tr class="border-t">
+          <td class="px-4 py-3 text-slate-500" colspan="4">No attendance submitted for this session.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock dashboard_actions %}

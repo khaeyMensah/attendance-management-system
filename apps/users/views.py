@@ -11,14 +11,17 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction, IntegrityError, DataError
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.core import signing
 from django.core.signing import BadSignature, SignatureExpired
+from django.utils import timezone
 
 from apps.users.forms import LoginForm, RegisterForm
 from apps.users.tokens import account_activation_token
 from apps.users.models import User
+from apps.courses.models import Course, Enrollment
+from apps.attendance.models import AttendanceRecord, Session
 
 logger = logging.getLogger(__name__)
 ADMIN_INVITE_SALT = 'users.admin_invite'
@@ -284,14 +287,49 @@ def logout_view(request):
 @login_required
 @role_required('student')
 def student_dashboard_view(request):
-    return render(request, 'users/student_dashboard.html')
-    # return render(request, 'users/dashboard.html')
+    attendance_qs = AttendanceRecord.objects.filter(
+        student=request.user
+    ).select_related('session__course').order_by('-check_in_time')
+    context = {
+        'enrolled_courses_count': Enrollment.objects.filter(student=request.user).count(),
+        'present_count': attendance_qs.filter(status='present').count(),
+        'absent_count': attendance_qs.filter(status='absent').count(),
+        'recent_attendance': attendance_qs[:8],
+    }
+    return render(request, 'users/student_dashboard.html', context)
 
 
 @login_required
 @role_required('lecturer')
 def lecturer_dashboard_view(request):
-    return render(request, 'users/lecturer_dashboard.html')
+    courses_qs = Course.objects.filter(lecturer=request.user).order_by('code')
+    all_sessions_qs = Session.objects.filter(
+        course__lecturer=request.user
+    ).select_related('course').annotate(
+        present_count=Count('attendance_records', filter=Q(attendance_records__status='present')),
+        absent_count=Count('attendance_records', filter=Q(attendance_records__status='absent')),
+    ).order_by('-start_time')
+
+    marked_attendance_total = AttendanceRecord.objects.filter(
+        session__course__lecturer=request.user,
+        status__in=['present', 'absent'],
+    ).count()
+    present_attendance_total = AttendanceRecord.objects.filter(
+        session__course__lecturer=request.user,
+        status='present',
+    ).count()
+    attendance_rate = None
+    if marked_attendance_total:
+        attendance_rate = round((present_attendance_total / marked_attendance_total) * 100, 1)
+
+    context = {
+        'courses': courses_qs,
+        'total_courses': courses_qs.count(),
+        'todays_sessions': all_sessions_qs.filter(start_time__date=timezone.localdate()).count(),
+        'attendance_rate': attendance_rate,
+        'recent_sessions': all_sessions_qs[:8],
+    }
+    return render(request, 'users/lecturer_dashboard.html', context)
 
 
 @login_required
