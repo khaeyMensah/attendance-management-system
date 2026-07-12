@@ -45,7 +45,7 @@
               {% else %}
                 <a href="{% url 'home' %}" class="px-3 py-2 rounded hover:bg-slate-100">Home</a>
               {% endif %}
-              <a href="/about" class="px-3 py-2 rounded hover:bg-slate-100">About</a>
+              <a href="{% url 'home' %}#how-it-works" class="px-3 py-2 rounded hover:bg-slate-100">About</a>
             </nav>
           </div>
 
@@ -66,8 +66,8 @@
       <!-- Mobile nav -->
       <nav id="mobile-menu" class="hidden border-t md:hidden" aria-label="Mobile">
         <div class="px-4 py-3 space-y-1">
-          <a href="/" class="block px-3 py-2 rounded hover:bg-slate-100">Home</a>
-          <a href="/about" class="block px-3 py-2 rounded hover:bg-slate-100">About</a>
+          <a href="{% url 'home' %}" class="block px-3 py-2 rounded hover:bg-slate-100">Home</a>
+          <a href="{% url 'home' %}#how-it-works" class="block px-3 py-2 rounded hover:bg-slate-100">About</a>
           {% if user.is_authenticated %}
             <a href="{% url 'users:logout' %}" class="block px-3 py-2 rounded hover:bg-slate-100">Logout</a>
           {% else %}
@@ -102,11 +102,11 @@
             {% else %}
               <a href="{% url 'users:login' %}" class="inline-flex items-center px-5 py-3 text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Login to Continue</a>
             {% endif %}
-            <a href="/about" class="inline-flex items-center px-4 py-3 bg-white border rounded-md text-slate-700 hover:bg-slate-50">Learn More</a>
+            <a href="{% url 'home' %}#how-it-works" class="inline-flex items-center px-4 py-3 bg-white border rounded-md text-slate-700 hover:bg-slate-50">Learn More</a>
           </div>
 
           <!-- How it works -->
-          <div class="grid gap-4 mt-10 sm:grid-cols-3" aria-label="How it works">
+          <div id="how-it-works" class="grid gap-4 mt-10 sm:grid-cols-3 scroll-mt-24" aria-label="How it works">
             <div class="p-4 bg-white rounded-lg shadow-sm">
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center w-10 h-10 font-medium text-indigo-600 rounded-full bg-indigo-50">1</span>
@@ -190,7 +190,7 @@
           </div>
           <nav class="flex items-center gap-4 text-sm text-slate-600" aria-label="Footer">
             <a href="{% url 'home' %}" class="hover:text-slate-900">Home</a>
-            <a href="/about" class="hover:text-slate-900">About</a>
+            <a href="{% url 'home' %}#how-it-works" class="hover:text-slate-900">About</a>
             {% if user.is_authenticated %}
               {% if user.role == 'student' %}
                 <a href="{% url 'users:student_dashboard' %}" class="hover:text-slate-900">Dashboard</a>

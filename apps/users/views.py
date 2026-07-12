@@ -5,7 +5,7 @@ from django.contrib import messages
 import logging
 from apps.users.decorators import role_required
 from django.contrib.sites.shortcuts import get_current_site
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -242,11 +242,18 @@ def activate(request, uidb64, token):
 
 
 def login_view(request):
+    next_url = request.POST.get('next') or request.GET.get('next') or ''
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return redirect(next_url)
             # redirect to role-specific dashboard
             if user.role == 'student':
                 return redirect('users:student_dashboard')
@@ -276,7 +283,7 @@ def login_view(request):
             return redirect('users:registration_pending')
     else:
         form = LoginForm(request)
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'accounts/login.html', {'form': form, 'next': next_url})
 
 
 def logout_view(request):
@@ -302,6 +309,7 @@ def student_dashboard_view(request):
 @login_required
 @role_required('lecturer')
 def lecturer_dashboard_view(request):
+    now = timezone.now()
     courses_qs = Course.objects.filter(lecturer=request.user).order_by('code')
     all_sessions_qs = Session.objects.filter(
         course__lecturer=request.user
@@ -327,6 +335,7 @@ def lecturer_dashboard_view(request):
         'total_courses': courses_qs.count(),
         'todays_sessions': all_sessions_qs.filter(start_time__date=timezone.localdate()).count(),
         'attendance_rate': attendance_rate,
+        'active_sessions': all_sessions_qs.filter(is_active=True, end_time__gte=now)[:6],
         'recent_sessions': all_sessions_qs[:8],
     }
     return render(request, 'users/lecturer_dashboard.html', context)
@@ -335,4 +344,10 @@ def lecturer_dashboard_view(request):
 @login_required
 @role_required('admin')
 def admin_dashboard_view(request):
-    return render(request, 'users/admin_dashboard.html')
+    context = {
+        'total_users': User.objects.count(),
+        'student_count': User.objects.filter(role='student').count(),
+        'lecturer_count': User.objects.filter(role='lecturer').count(),
+        'attendance_logs_count': AttendanceRecord.objects.count(),
+    }
+    return render(request, 'users/admin_dashboard.html', context)

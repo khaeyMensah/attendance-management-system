@@ -19,6 +19,7 @@
 {% block dashboard_actions %}
 <div class="mt-6 flex flex-wrap gap-2">
   <a href="{% url 'attendance:start_session' course.id %}" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Start Session</a>
+  <a href="{% url 'courses:manage_course_students' course.id %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50">Manage Students</a>
   <a href="{% url 'users:lecturer_dashboard' %}" class="inline-flex items-center rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50">Back to Dashboard</a>
 </div>
 

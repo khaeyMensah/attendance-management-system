@@ -17,6 +17,8 @@
   data-student-dashboard-url="{% url 'users:student_dashboard' %}"
   data-lecturer-dashboard-url="{% url 'users:lecturer_dashboard' %}"
   data-admin-dashboard-url="{% url 'users:admin_dashboard' %}"
+  data-enter-code-url="{% url 'attendance:enter_code' %}"
+  data-my-attendance-url="{% url 'attendance:my_attendance' %}"
   data-password-change-url="{% url 'users:password_change' %}"
   data-logout-url="{% url 'users:logout' %}"
 >
@@ -157,7 +159,7 @@
         </div>
         <nav class="flex items-center gap-4 text-sm text-slate-600" aria-label="Dashboard footer">
           <a href="{% url 'home' %}" class="hover:text-slate-900">Home</a>
-          <a href="/about" class="hover:text-slate-900">About</a>
+          <a href="{% url 'home' %}#how-it-works" class="hover:text-slate-900">About</a>
           <a href="{% url 'users:password_change' %}" class="hover:text-slate-900">Settings</a>
           <a href="{% url 'users:logout' %}" class="hover:text-slate-900">Logout</a>
         </nav>

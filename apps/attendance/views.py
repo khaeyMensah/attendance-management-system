@@ -1,7 +1,8 @@
 from datetime import timedelta
+from base64 import b64encode
+from io import BytesIO
 import secrets
 import string
-from urllib.parse import quote_plus
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,8 @@ from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+import qrcode
+import qrcode.image.svg
 
 from apps.attendance.forms import AccessCodeForm, StartSessionForm
 from apps.attendance.models import AttendanceRecord, Session
@@ -31,6 +34,19 @@ def _generate_unique_access_code(length=6):
         code = ''.join(secrets.choice(alphabet) for _ in range(length))
         if not Session.objects.filter(access_code=code).exists():
             return code
+
+
+def _generate_qr_svg_data_uri(data):
+    qr_image = qrcode.make(
+        data,
+        image_factory=qrcode.image.svg.SvgPathImage,
+        box_size=12,
+        border=3,
+    )
+    output = BytesIO()
+    qr_image.save(output)
+    encoded_svg = b64encode(output.getvalue()).decode('ascii')
+    return f'data:image/svg+xml;base64,{encoded_svg}'
 
 
 def _redirect_to_dashboard(user):
@@ -97,7 +113,7 @@ def session_qr_view(request, session_id):
     scan_url = request.build_absolute_uri(
         reverse('attendance:scan_qr', kwargs={'qr_token': session.qr_token})
     )
-    qr_image_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={quote_plus(scan_url)}"
+    qr_image_url = _generate_qr_svg_data_uri(scan_url)
     return render(
         request,
         'attendance/session_qr.html',
@@ -240,7 +256,18 @@ def close_session_view(request, session_id):
     if session.is_active:
         session.is_active = False
         session.save(update_fields=['is_active'])
-        messages.success(request, 'Session closed.')
+        existing_student_ids = AttendanceRecord.objects.filter(
+            session=session,
+        ).values_list('student_id', flat=True)
+        absent_records = [
+            AttendanceRecord(student_id=student_id, session=session, status='absent')
+            for student_id in Enrollment.objects.filter(course=session.course)
+            .exclude(student_id__in=existing_student_ids)
+            .values_list('student_id', flat=True)
+        ]
+        if absent_records:
+            AttendanceRecord.objects.bulk_create(absent_records, ignore_conflicts=True)
+        messages.success(request, f'Session closed. {len(absent_records)} absent record(s) created.')
     else:
         messages.info(request, 'Session is already closed.')
     return redirect('attendance:session_records', session_id=session.pk)

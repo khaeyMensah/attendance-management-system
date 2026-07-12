@@ -6,4 +6,5 @@ app_name = 'courses'
 
 urlpatterns = [
     path('lecturer/<int:course_id>/', views.lecturer_course_detail_view, name='lecturer_course_detail'),
+    path('lecturer/<int:course_id>/students/', views.manage_course_students_view, name='manage_course_students'),
 ]

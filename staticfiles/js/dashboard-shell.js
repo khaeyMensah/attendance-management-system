@@ -105,6 +105,8 @@
       const studentDashboardUrl = shell.dataset.studentDashboardUrl || "";
       const lecturerDashboardUrl = shell.dataset.lecturerDashboardUrl || "";
       const adminDashboardUrl = shell.dataset.adminDashboardUrl || "";
+      const enterCodeUrl = shell.dataset.enterCodeUrl || "";
+      const myAttendanceUrl = shell.dataset.myAttendanceUrl || "";
       const passwordChangeUrl = shell.dataset.passwordChangeUrl || "";
       const logoutUrl = shell.dataset.logoutUrl || "";
 
@@ -117,8 +119,8 @@
 
       const routes = {
         dashboard: dashboardUrl,
-        "scan qr code": studentDashboardUrl ? studentDashboardUrl + "#scan-qr" : "",
-        "my attendance": studentDashboardUrl ? studentDashboardUrl + "#attendance" : "",
+        "scan qr code": enterCodeUrl,
+        "my attendance": myAttendanceUrl,
         courses: lecturerDashboardUrl ? lecturerDashboardUrl + "#courses" : "",
         sessions: lecturerDashboardUrl ? lecturerDashboardUrl + "#sessions" : "",
         reports: lecturerDashboardUrl ? lecturerDashboardUrl + "#attendance-reports" : "",
